@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@theme {
+  --color-sky-deep: #1e3a8a;
+  --color-grass: #4ade80;
+  --font-display: "Trebuchet MS", "Comic Sans MS", "Segoe UI", system-ui, sans-serif;
+}
+
+:root {
+  --bg-gradient: linear-gradient(180deg, #7dd3fc 0%, #bae6fd 45%, #d9f99d 100%);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-display);
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  color: #1e293b;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Large, touch-friendly focus states for keyboard navigation */
+:focus-visible {
+  outline: 4px solid #f59e0b;
+  outline-offset: 2px;
+  border-radius: 0.75rem;
+}
+
+button {
+  touch-action: manipulation;
+}
+
+/* Print styles: teacher reports become clean PDFs via print-to-PDF */
+@media print {
+  body {
+    background: #fff !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-block {
+    break-inside: avoid;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}

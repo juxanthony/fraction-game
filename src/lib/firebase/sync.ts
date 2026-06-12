@@ -43,7 +43,7 @@ async function init() {
 export function queueCloudWrite(
   collectionName: CollectionName,
   id: string,
-  data: Record<string, unknown>
+  data: object
 ): void {
   if (!getFirebaseConfig() || typeof window === "undefined") return;
   void (async () => {

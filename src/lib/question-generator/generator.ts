@@ -46,37 +46,65 @@ function properFraction(maxDen: number, minDen = 2): Fraction {
   return { num, den };
 }
 
-/** Build 4 unique options (by displayed text AND value where comparable). */
+/** Parse the numeric value of an option text ("3/4", "1 2/5", "2"); NaN for sequences. */
+function parseValue(text: string): number {
+  const mixed = /^(\d+)\s+(\d+)\/(\d+)$/.exec(text);
+  if (mixed) return Number(mixed[1]) + Number(mixed[2]) / Number(mixed[3]);
+  const frac = /^(\d+)\/(\d+)$/.exec(text);
+  if (frac) return Number(frac[1]) / Number(frac[2]);
+  const whole = /^(\d+)$/.exec(text);
+  if (whole) return Number(whole[1]);
+  return NaN;
+}
+
+/**
+ * Build 4 unique options. Uniqueness is enforced by displayed text AND by
+ * numeric value (so "1 1/2" and "3/2" can never appear together).
+ */
 function buildOptions(
   correct: string,
   distractorPool: { text: string; errorTag: ErrorTag }[],
   fallback: () => string
 ): { options: Option[]; correctIndex: number } {
-  const seen = new Set<string>([correct]);
+  const seenText = new Set<string>([correct]);
+  const seenValues = new Set<number>();
+  const correctValue = parseValue(correct);
+  if (!Number.isNaN(correctValue)) seenValues.add(Math.round(correctValue * 100000));
+
+  const accept = (text: string): boolean => {
+    if (!text || seenText.has(text)) return false;
+    const v = parseValue(text);
+    if (!Number.isNaN(v)) {
+      const key = Math.round(v * 100000);
+      if (seenValues.has(key)) return false;
+      seenValues.add(key);
+    }
+    seenText.add(text);
+    return true;
+  };
+
   const distractors: Option[] = [];
   for (const d of distractorPool) {
     if (distractors.length >= 3) break;
-    if (!d.text || seen.has(d.text)) continue;
-    seen.add(d.text);
-    distractors.push(d);
+    if (accept(d.text)) distractors.push(d);
   }
   let guard = 0;
-  while (distractors.length < 3 && guard++ < 100) {
+  while (distractors.length < 3 && guard++ < 200) {
     const t = fallback();
-    if (!seen.has(t)) {
-      seen.add(t);
-      distractors.push({ text: t, errorTag: "random-near" });
-    }
+    if (accept(t)) distractors.push({ text: t, errorTag: "random-near" });
   }
   const options = shuffle<Option>([{ text: correct }, ...distractors]);
   return { options, correctIndex: options.findIndex((o) => !o.errorTag && o.text === correct) };
 }
 
+/** Diverse fallback distractor: a fraction near the value of `f`, never equal to it. */
 function nearbyFraction(f: Fraction): string {
-  const t = randInt(0, 2);
-  if (t === 0 && f.num + 1 < f.den * 3) return fToString(simplify({ num: f.num + 1, den: f.den }));
-  if (t === 1 && f.num - 1 >= 1) return fToString(simplify({ num: f.num - 1, den: f.den }));
-  return fToString(simplify({ num: f.num, den: f.den + 1 }));
+  const target = f.num / f.den;
+  const den = randInt(2, 12);
+  const num = Math.max(1, Math.round(target * den) + pick([-2, -1, 1, 2]));
+  const candidate = simplify({ num, den });
+  if (candidate.num === 0) return nearbyFraction(f);
+  return candidate.num >= candidate.den ? mixedToString(toMixed(candidate)) : fToString(candidate);
 }
 
 /* ------------------------------------------------------------------ */
@@ -205,12 +233,13 @@ function genEquivalent(difficulty: Difficulty): Question {
   const correctF = { num: base.num * k, den: base.den * k };
   const correct = fToString(correctF);
 
-  const distractorPool: { text: string; errorTag: ErrorTag }[] = [
+  const rawPool: { text: string; errorTag: ErrorTag }[] = [
     { text: fToString({ num: base.num + k, den: base.den + k }), errorTag: "additive-misconception" },
     { text: fToString({ num: base.num * k, den: base.den }), errorTag: "scaled-numerator-only" },
     { text: fToString({ num: base.num, den: base.den * k }), errorTag: "scaled-denominator-only" },
     { text: fToString({ num: base.num * k + 1, den: base.den * k }), errorTag: "off-by-one" },
-  ].filter((d) => {
+  ];
+  const distractorPool = rawPool.filter((d) => {
     const [n, dd] = d.text.split("/").map(Number);
     return !dd || !equals({ num: n, den: dd }, base);
   });
@@ -276,12 +305,12 @@ function genAddition(difficulty: Difficulty): Question {
 
   const common = lcm(a.den, b.den);
   const distractorPool: { text: string; errorTag: ErrorTag }[] = [
-    { text: fToString(simplify({ num: a.num + b.num, den: a.den + b.den })), errorTag: "added-denominators" },
+    { text: fToString(simplify({ num: a.num + b.num, den: a.den + b.den })), errorTag: "added-denominators" as ErrorTag },
     ...(a.den !== b.den
       ? [{ text: fToString(simplify({ num: a.num + b.num, den: common })), errorTag: "unconverted-numerators" as ErrorTag }]
       : []),
-    { text: fToString(simplify({ num: result.num + 1, den: result.den })), errorTag: "off-by-one" },
-    { text: fToString(simplify({ num: Math.max(1, result.num - 1), den: result.den })), errorTag: "off-by-one" },
+    { text: fToString(simplify({ num: result.num + 1, den: result.den })), errorTag: "off-by-one" as ErrorTag },
+    { text: fToString(simplify({ num: Math.max(1, result.num - 1), den: result.den })), errorTag: "off-by-one" as ErrorTag },
   ];
 
   const { options, correctIndex } = buildOptions(correct, dedupeByValue(distractorPool, result), () =>
@@ -340,7 +369,7 @@ function genSubtraction(difficulty: Difficulty): Question {
   const correct = fToString(result);
   const common = lcm(a.den, b.den);
 
-  const distractorPool: { text: string; errorTag: ErrorTag }[] = [
+  const rawPool: { text: string; errorTag: ErrorTag }[] = [
     ...(a.den !== b.den
       ? [
           { text: safeFrac(a.num - b.num, Math.abs(a.den - b.den)), errorTag: "subtracted-denominators" as ErrorTag },
@@ -349,7 +378,8 @@ function genSubtraction(difficulty: Difficulty): Question {
       : []),
     { text: fToString(simplify({ num: result.num + 1, den: result.den })), errorTag: "off-by-one" },
     { text: fToString(simplify({ num: a.num + b.num, den: a.den === b.den ? a.den : a.den + b.den })), errorTag: "denominator-confusion" },
-  ].filter((d) => d.text !== "");
+  ];
+  const distractorPool = rawPool.filter((d) => d.text !== "");
 
   const { options, correctIndex } = buildOptions(correct, dedupeByValue(distractorPool, result), () =>
     nearbyFraction(result)
@@ -519,14 +549,14 @@ function genWordProblem(difficulty: Difficulty): Question {
   const distractorPool: { text: string; errorTag: ErrorTag }[] =
     template.op === "add"
       ? [
-          { text: fToString(simplify({ num: a.num + b.num, den: a.den + b.den })), errorTag: "added-denominators" },
-          { text: safeFrac(Math.abs(a.num * b.den - b.num * a.den), a.den * b.den), errorTag: "denominator-confusion" },
-          { text: fToString(simplify({ num: result.num + 1, den: result.den })), errorTag: "off-by-one" },
+          { text: fToString(simplify({ num: a.num + b.num, den: a.den + b.den })), errorTag: "added-denominators" as ErrorTag },
+          { text: safeFrac(Math.abs(a.num * b.den - b.num * a.den), a.den * b.den), errorTag: "denominator-confusion" as ErrorTag },
+          { text: fToString(simplify({ num: result.num + 1, den: result.den })), errorTag: "off-by-one" as ErrorTag },
         ]
       : [
-          { text: fToString(simplify({ num: a.num + b.num > 0 ? a.num + b.num : 1, den: common })), errorTag: "denominator-confusion" },
-          { text: safeFrac(a.num - b.num, Math.abs(a.den - b.den)), errorTag: "subtracted-denominators" },
-          { text: fToString(simplify({ num: result.num + 1, den: result.den })), errorTag: "off-by-one" },
+          { text: fToString(simplify({ num: a.num + b.num > 0 ? a.num + b.num : 1, den: common })), errorTag: "denominator-confusion" as ErrorTag },
+          { text: safeFrac(a.num - b.num, Math.abs(a.den - b.den)), errorTag: "subtracted-denominators" as ErrorTag },
+          { text: fToString(simplify({ num: result.num + 1, den: result.den })), errorTag: "off-by-one" as ErrorTag },
         ];
 
   const { options, correctIndex } = buildOptions(
