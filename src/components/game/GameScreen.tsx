@@ -11,7 +11,9 @@ import {
   answer as applyAnswer,
   createMatch,
   endPractice,
+  timeAllowedSeconds,
 } from "@/lib/game-engine/engine";
+import type { Question } from "@/lib/question-generator/types";
 import { finalizeMatch, recordAttempt, type MatchOutcome } from "@/lib/game-engine/recorder";
 import type { StudentProfile } from "@/lib/storage/models";
 import { getActiveProfile } from "@/lib/storage/local";
@@ -42,7 +44,7 @@ export default function GameScreen({
 }: Props) {
   const { t } = useI18n();
   const [state, setState] = useState<MatchState>(() => createMatch(config));
-  const [timeLeft, setTimeLeft] = useState<number | null>(config.timePerQuestion);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [outcome, setOutcome] = useState<MatchOutcome | null>(null);
 
   const questionStartRef = useRef<number>(Date.now());
@@ -56,6 +58,10 @@ export default function GameScreen({
   // exactly once, outside React's setState updaters.
   const stateRef = useRef(state);
   stateRef.current = state;
+
+  // Per-question history so the results screen can show every question's
+  // explanation for review.
+  const historyRef = useRef<{ question: Question; selectedIndex: number | null; correct: boolean }[]>([]);
 
   /* ---------------- answer handling ---------------- */
 
@@ -73,6 +79,11 @@ export default function GameScreen({
         polyaViewed: polyaViewedRef.current,
       });
       selectedRef.current = index;
+      historyRef.current.push({
+        question: prev.question,
+        selectedIndex: index,
+        correct: index !== null && index === prev.question.correctIndex,
+      });
       const next = applyAnswer(prev, index);
       streakBonusRef.current += next.lastResult?.streakBonusXp ?? 0;
       if (next.lastResult?.correct) playCorrect();
@@ -108,13 +119,15 @@ export default function GameScreen({
   }, []);
 
   /* ---------------- per-question countdown ---------------- */
+  // 30 s for recognition questions, 60 s for calculation questions.
 
   useEffect(() => {
-    if (state.phase !== "playing" || config.timePerQuestion === null) return;
-    setTimeLeft(config.timePerQuestion);
+    if (state.phase !== "playing" || !config.timed) return;
+    const total = timeAllowedSeconds(stateRef.current.question.topic);
+    setTimeLeft(total);
     const started = Date.now();
     const id = window.setInterval(() => {
-      const remaining = config.timePerQuestion! - Math.floor((Date.now() - started) / 1000);
+      const remaining = total - Math.floor((Date.now() - started) / 1000);
       setTimeLeft(remaining);
       if (remaining <= 5 && remaining > 0) playTick();
       if (remaining <= 0) {
@@ -123,7 +136,7 @@ export default function GameScreen({
       }
     }, 250);
     return () => window.clearInterval(id);
-  }, [state.questionIndex, state.phase, config.timePerQuestion, handleAnswer]);
+  }, [state.questionIndex, state.phase, config.timed, handleAnswer]);
 
   /* ---------------- keyboard navigation ---------------- */
 
@@ -156,6 +169,7 @@ export default function GameScreen({
     hintUsedRef.current = false;
     polyaViewedRef.current = false;
     selectedRef.current = null;
+    historyRef.current = [];
     questionStartRef.current = Date.now();
     setOutcome(null);
     setState(createMatch(config));
@@ -164,7 +178,15 @@ export default function GameScreen({
   /* ---------------- render ---------------- */
 
   if (state.phase === "finished") {
-    return <ResultsScreen state={state} outcome={outcome} onPlayAgain={restart} onExit={onExit} />;
+    return (
+      <ResultsScreen
+        state={state}
+        outcome={outcome}
+        history={historyRef.current}
+        onPlayAgain={restart}
+        onExit={onExit}
+      />
+    );
   }
 
   const total = Number.isFinite(config.totalQuestions) ? config.totalQuestions : null;
@@ -195,7 +217,7 @@ export default function GameScreen({
               🔥 {t("game.streak")} {state.streak}
             </motion.span>
           )}
-          {timeLeft !== null && config.timePerQuestion !== null && state.phase === "playing" && (
+          {timeLeft !== null && config.timed && state.phase === "playing" && (
             <span
               className={`rounded-full px-4 py-1.5 font-extrabold text-sm border-2 ${
                 timeLeft <= 5

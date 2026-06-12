@@ -6,18 +6,28 @@
  * pulling the rope back.
  */
 
-import type { Question } from "@/lib/question-generator/types";
+import type { Question, Topic } from "@/lib/question-generator/types";
 import { questionForTurn } from "@/lib/question-generator/generator";
 import type { GameMode } from "@/lib/storage/models";
 
 export const WIN_AT = 5;
 
+/** Recognition questions get 30 s; questions needing written calculation get 60 s. */
+export const TIME_EASY_S = 30;
+export const TIME_CALC_S = 60;
+
+const CALCULATION_TOPICS: Topic[] = ["addition", "subtraction", "mixedNumbers", "wordProblem"];
+
+export function timeAllowedSeconds(topic: Topic): number {
+  return CALCULATION_TOPICS.includes(topic) ? TIME_CALC_S : TIME_EASY_S;
+}
+
 export interface MatchConfig {
   mode: GameMode;
   /** Fixed number of questions; Infinity for practice. */
   totalQuestions: number;
-  /** Seconds per question; null = untimed. */
-  timePerQuestion: number | null;
+  /** Per-question countdown on/off (length depends on the question's topic). */
+  timed: boolean;
   /** Probability the AI opponent answers correctly each turn (tournament). */
   aiAccuracy: number;
   /** Restrict to one curriculum level (1–6); undefined = mixed sweep. */

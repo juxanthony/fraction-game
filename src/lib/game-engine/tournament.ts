@@ -23,7 +23,7 @@ export function tournamentMatchConfig(round: TournamentRound): MatchConfig {
   return {
     mode: "tournament",
     totalQuestions: round.totalQuestions,
-    timePerQuestion: 30,
+    timed: true,
     aiAccuracy: round.aiAccuracy,
     minDifficulty: round.minDifficulty,
     tournamentRound: round.index,

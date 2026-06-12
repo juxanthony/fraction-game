@@ -32,7 +32,7 @@ export default function ChallengePage() {
               config={{
                 mode: "challenge",
                 totalQuestions: 20,
-                timePerQuestion: 30,
+                timed: true,
                 aiAccuracy: 0,
               }}
               profile={profile}

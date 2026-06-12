@@ -43,7 +43,8 @@ export default function PracticePage() {
                   🎲 {t("menu.mixedTopics")}
                 </button>
               </div>
-              <div className="text-center">
+              <div className="flex justify-center gap-3 flex-wrap">
+                <Button variant="ghost" onClick={() => router.push("/notes")}>📖 {t("menu.notes")}</Button>
                 <Button variant="ghost" onClick={() => router.push("/")}>← {t("game.backToMenu")}</Button>
               </div>
             </Card>
@@ -53,7 +54,7 @@ export default function PracticePage() {
               config={{
                 mode: "practice",
                 totalQuestions: Infinity,
-                timePerQuestion: null,
+                timed: true,
                 aiAccuracy: 0,
                 level: level === "mixed" ? undefined : level,
               }}

@@ -71,7 +71,13 @@ export default function HomePage() {
         ))}
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid sm:grid-cols-3 gap-4">
+        <Link
+          href="/notes"
+          className="rounded-3xl bg-white/90 border-2 border-white shadow p-4 flex items-center gap-3 font-extrabold text-slate-700 hover:bg-white"
+        >
+          <span className="text-3xl">📖</span> {t("menu.notes")}
+        </Link>
         <Link
           href="/profile"
           className="rounded-3xl bg-white/90 border-2 border-white shadow p-4 flex items-center gap-3 font-extrabold text-slate-700 hover:bg-white"

@@ -3,10 +3,10 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useI18n } from "@/lib/i18n";
-import { WIN_AT } from "@/lib/game-engine/engine";
+import { WIN_AT, timeAllowedSeconds } from "@/lib/game-engine/engine";
 import { questionForTurn } from "@/lib/question-generator/generator";
 import type { Question } from "@/lib/question-generator/types";
-import { playCorrect, playWin, playWrong } from "@/lib/audio";
+import { playCorrect, playTick, playWin, playWrong } from "@/lib/audio";
 import TugOfWarScene from "./TugOfWarScene";
 import QuestionCard from "./QuestionCard";
 import FractionText from "@/components/fractions/FractionText";
@@ -38,6 +38,8 @@ export default function MultiplayerScreen({ player1, player2, onExit }: Props) {
   const [question, setQuestion] = useState<Question>(() => questionForTurn(0, TOTAL_QUESTIONS, {}));
   const [phase, setPhase] = useState<Phase>("handover");
   const [selected, setSelected] = useState<number | null>(null);
+  const [timedOut, setTimedOut] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const wonRef = useRef(false);
 
   const names = [player1, player2];
@@ -52,13 +54,14 @@ export default function MultiplayerScreen({ player1, player2, onExit }: Props) {
   }, []);
 
   const handleAnswer = useCallback(
-    (i: number) => {
+    (i: number | null) => {
       if (phase !== "playing") return;
-      const correct = i === question.correctIndex;
+      const correct = i !== null && i === question.correctIndex;
       const sign = turn === 0 ? 1 : -1;
       const delta = (correct ? 1 : -1) * sign;
       const newRope = Math.max(-WIN_AT, Math.min(WIN_AT, rope + delta));
       setSelected(i);
+      setTimedOut(i === null);
       setRope(newRope);
       if (correct) {
         playCorrect();
@@ -80,9 +83,28 @@ export default function MultiplayerScreen({ player1, player2, onExit }: Props) {
     setIndex(nextIndex);
     setQuestion(questionForTurn(nextIndex, TOTAL_QUESTIONS, {}));
     setSelected(null);
+    setTimedOut(false);
     setTurn((t0) => (t0 === 0 ? 1 : 0));
     setPhase("handover");
   }, [rope, index, finish]);
+
+  /* Per-question countdown: 30 s easy / 60 s calculation questions. */
+  useEffect(() => {
+    if (phase !== "playing") return;
+    const total = timeAllowedSeconds(question.topic);
+    setTimeLeft(total);
+    const started = Date.now();
+    const id = window.setInterval(() => {
+      const remaining = total - Math.floor((Date.now() - started) / 1000);
+      setTimeLeft(remaining);
+      if (remaining <= 5 && remaining > 0) playTick();
+      if (remaining <= 0) {
+        window.clearInterval(id);
+        handleAnswer(null);
+      }
+    }, 250);
+    return () => window.clearInterval(id);
+  }, [phase, question, handleAnswer]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -133,6 +155,18 @@ export default function MultiplayerScreen({ player1, player2, onExit }: Props) {
           <span className="rounded-full bg-white/90 border-2 border-slate-200 px-4 py-1.5 font-bold text-slate-700 text-sm">
             {index + 1} / {TOTAL_QUESTIONS}
           </span>
+          {phase === "playing" && timeLeft !== null && (
+            <span
+              className={`rounded-full px-4 py-1.5 font-extrabold text-sm border-2 ${
+                timeLeft <= 5
+                  ? "bg-rose-100 border-rose-400 text-rose-700 animate-pulse"
+                  : "bg-white/90 border-slate-200 text-slate-700"
+              }`}
+              aria-live="polite"
+            >
+              ⏱ {Math.max(0, timeLeft)}{t("common.seconds")}
+            </span>
+          )}
         </div>
       </div>
 
@@ -166,7 +200,11 @@ export default function MultiplayerScreen({ player1, player2, onExit }: Props) {
                 }`}
               >
                 <p className="font-extrabold">
-                  {selected === question.correctIndex ? `✅ ${t("game.correct")}` : `❌ ${t("game.wrong")}`}
+                  {selected === question.correctIndex
+                    ? `✅ ${t("game.correct")}`
+                    : timedOut
+                      ? `⏰ ${t("game.timeout")}`
+                      : `❌ ${t("game.wrong")}`}
                 </p>
                 <p className="text-slate-700 text-sm">
                   <FractionText text={t(question.explanationKey, question.explanationParams)} />
