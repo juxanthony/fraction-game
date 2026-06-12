@@ -29,6 +29,7 @@ export default function ProfileGate({
   const [loaded, setLoaded] = useState(false);
   const [name, setName] = useState("");
   const [className, setClassName] = useState("");
+  const [classCode, setClassCode] = useState("");
   const [avatar, setAvatar] = useState(AVATARS[0]);
 
   useEffect(() => {
@@ -46,7 +47,7 @@ export default function ProfileGate({
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-    setProfile(createProfile(name, className, avatar));
+    setProfile(createProfile(name, className, avatar, classCode));
   };
 
   return (
@@ -94,6 +95,17 @@ export default function ProfileGate({
             maxLength={20}
             className="mt-1 w-full rounded-2xl border-2 border-slate-300 px-4 py-3 text-lg focus:border-blue-500 outline-none"
           />
+        </label>
+        <label className="block">
+          <span className="font-bold text-slate-700">{t("profile.classCode")}</span>
+          <input
+            value={classCode}
+            onChange={(e) => setClassCode(e.target.value.toUpperCase())}
+            placeholder={t("profile.classCodePlaceholder")}
+            maxLength={20}
+            className="mt-1 w-full rounded-2xl border-2 border-slate-300 px-4 py-3 text-lg uppercase tracking-widest focus:border-blue-500 outline-none"
+          />
+          <span className="text-xs text-slate-500 font-semibold">{t("profile.classCode.help")}</span>
         </label>
         <div className="flex gap-2 flex-wrap justify-center" role="radiogroup" aria-label="avatar">
           {AVATARS.map((a) => (

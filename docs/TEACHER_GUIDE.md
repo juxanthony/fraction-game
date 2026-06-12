@@ -16,6 +16,17 @@
 
 Two-player mode works well for pair work and peer tutoring (the explanation appears after every answer, so the watching pupil learns too).
 
+## Linking pupils to your dashboard (cloud monitoring)
+
+By default the dashboard shows pupils who play **on the same device** — fine for a shared classroom tablet, no setup needed. To monitor your whole class across many devices (school lab, pupils' homes):
+
+1. Ask your school/IT coordinator to enable Firebase cloud sync once (5 minutes — see [DEPLOYMENT.md](DEPLOYMENT.md)).
+2. **Invent a class code**, e.g. `5B-TAN`. Any short code works; include your name or class to keep it unique within your school.
+3. Tell pupils to type this code into the **"Class code"** field when they create their player. (Existing players can be re-created with the code, or keep playing on the same device.)
+4. Open **Teacher Dashboard → Monitor a class**, enter the code and press **Load class**. The overview, student drill-downs, skills analysis and exports now show the linked class's latest cloud data; press **Show this device** to switch back.
+
+The class code is not a password — treat it like a capability: anyone who knows it (and your app URL) can view the class's first names and scores. For research-grade deployments use the strict security rules in [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md).
+
 ## The dashboard (/teacher)
 
 | Tab | What you see |

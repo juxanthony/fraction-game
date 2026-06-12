@@ -54,11 +54,17 @@ export function setActiveProfile(id: string): void {
   write(KEYS.active, id);
 }
 
-export function createProfile(name: string, className: string, avatar: string): StudentProfile {
+export function createProfile(
+  name: string,
+  className: string,
+  avatar: string,
+  classCode?: string
+): StudentProfile {
   const profile: StudentProfile = {
     id: uid(),
     name: name.trim(),
     className: className.trim(),
+    classCode: classCode?.trim().toUpperCase() || undefined,
     avatar,
     createdAt: Date.now(),
     lastActiveAt: Date.now(),
@@ -94,7 +100,10 @@ export function addAttempt(attempt: AttemptRecord): void {
   list.push(attempt);
   if (list.length > MAX_ATTEMPTS_STORED) list.splice(0, list.length - MAX_ATTEMPTS_STORED);
   write(KEYS.attempts(attempt.profileId), list);
-  queueCloudWrite("attempts", attempt.id, attempt);
+  // classCode is denormalised onto each cloud record so the teacher dashboard
+  // can query a whole class with a single Firestore filter.
+  const classCode = getProfiles().find((p) => p.id === attempt.profileId)?.classCode;
+  queueCloudWrite("attempts", attempt.id, classCode ? { ...attempt, classCode } : attempt);
 }
 
 /* ------------------------------ matches ----------------------------- */
@@ -107,7 +116,8 @@ export function addMatch(match: MatchRecord): void {
   const list = getMatches(match.profileId);
   list.push(match);
   write(KEYS.matches(match.profileId), list);
-  queueCloudWrite("matches", match.id, match);
+  const classCode = getProfiles().find((p) => p.id === match.profileId)?.classCode;
+  queueCloudWrite("matches", match.id, classCode ? { ...match, classCode } : match);
 }
 
 /* ------------------------------ missions ---------------------------- */

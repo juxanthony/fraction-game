@@ -22,6 +22,7 @@ The app uses a **local-first** model: localStorage is the source of truth on eac
 | `id` | string | Random uid |
 | `name` | string | Pupil name |
 | `className` | string | e.g. "5 Bestari" |
+| `classCode` | string? | Teacher's class code (uppercased), entered by the pupil at profile creation. Links the pupil to a teacher's cloud dashboard. Denormalised onto every mirrored attempt/match document so a class loads with one equality query. |
 | `avatar` | string | Emoji avatar |
 | `createdAt` / `lastActiveAt` | number | Epoch ms |
 | `xp` | number | Lifetime XP (level is derived — `levelFromXp`) |
@@ -67,23 +68,40 @@ matches/{matchId}       ← MatchRecord + syncedAt
 
 Writes use `setDoc(..., { merge: true })` and are fire-and-forget; the device never blocks on the network. Devices authenticate via **Anonymous Authentication**.
 
+### Teacher ↔ student linking (class codes)
+
+The teacher invents a class code (e.g. `5B-TAN`) and pupils type it once when creating their player. Every mirrored document then carries `classCode`, and the teacher dashboard loads the class with single-field equality queries (no composite indexes needed):
+
+```
+profiles  where classCode == "5B-TAN"
+attempts  where classCode == "5B-TAN"
+matches   where classCode == "5B-TAN"
+```
+
 ### Suggested security rules
+
+Two postures, depending on how sensitive you consider the data (pupil first names + scores):
+
+**Simple classroom posture** — anyone signed in (incl. anonymous devices) can read; the class code acts as a capability. Easy to operate, adequate for low-stakes classroom data:
 
 ```js
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Pupils' devices (anonymous auth) may create/update records.
-    // Reads are restricted to teacher/researcher accounts via custom claims.
     match /{collection}/{doc} {
       allow create, update: if request.auth != null
         && collection in ['profiles', 'attempts', 'matches'];
-      allow read: if request.auth != null
-        && request.auth.token.teacher == true;
+      allow read: if request.auth != null;
       allow delete: if false;
     }
   }
 }
 ```
 
-For research deployments, mint teacher/researcher accounts with the `teacher` custom claim via the Firebase Admin SDK, and export collections with the Firebase CLI (`firestore:export`) or BigQuery integration for analysis at scale.
+**Strict research posture** — reads only for teacher/researcher accounts carrying a custom claim (mint with the Firebase Admin SDK). With this posture the in-app class-code loader requires teachers to sign in with one of these accounts:
+
+```js
+allow read: if request.auth != null && request.auth.token.teacher == true;
+```
+
+For research deployments, export collections with the Firebase CLI (`firestore:export`) or the BigQuery integration for analysis at scale.

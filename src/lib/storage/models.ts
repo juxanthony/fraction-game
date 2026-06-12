@@ -6,6 +6,8 @@ export interface StudentProfile {
   id: string;
   name: string;
   className: string;
+  /** Teacher's class code — links this pupil to a teacher's cloud dashboard. */
+  classCode?: string;
   avatar: string;
   createdAt: number;
   lastActiveAt: number;

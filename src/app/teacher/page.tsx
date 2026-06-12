@@ -22,6 +22,8 @@ import {
 } from "@/lib/analytics/export";
 import { BADGES } from "@/lib/gamification/badges";
 import { levelFromXp } from "@/lib/gamification/xp";
+import { isFirebaseEnabled } from "@/lib/firebase/config";
+import { fetchClassData, type ClassData } from "@/lib/firebase/teacher";
 import { HBarChart, LineChart, StatCard } from "@/components/dashboard/charts";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -33,17 +35,43 @@ export default function TeacherDashboard() {
   const { t } = useI18n();
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("overview");
-  const [profiles, setProfiles] = useState<StudentProfile[]>([]);
-  const [attemptsByProfile, setAttemptsByProfile] = useState<Map<string, AttemptRecord[]>>(new Map());
-  const [matchesByProfile, setMatchesByProfile] = useState<Map<string, MatchRecord[]>>(new Map());
+  const [localProfiles, setLocalProfiles] = useState<StudentProfile[]>([]);
+  const [localAttempts, setLocalAttempts] = useState<Map<string, AttemptRecord[]>>(new Map());
+  const [localMatches, setLocalMatches] = useState<Map<string, MatchRecord[]>>(new Map());
   const [selectedStudent, setSelectedStudent] = useState<StudentProfile | null>(null);
+
+  /* Cloud class monitoring: pupils linked via class code (see docs/TEACHER_GUIDE.md) */
+  const [cloud, setCloud] = useState<ClassData | null>(null);
+  const [codeInput, setCodeInput] = useState("");
+  const [cloudLoading, setCloudLoading] = useState(false);
+  const [cloudError, setCloudError] = useState(false);
 
   useEffect(() => {
     const ps = getProfiles();
-    setProfiles(ps);
-    setAttemptsByProfile(new Map(ps.map((p) => [p.id, getAttempts(p.id)])));
-    setMatchesByProfile(new Map(ps.map((p) => [p.id, getMatches(p.id)])));
+    setLocalProfiles(ps);
+    setLocalAttempts(new Map(ps.map((p) => [p.id, getAttempts(p.id)])));
+    setLocalMatches(new Map(ps.map((p) => [p.id, getMatches(p.id)])));
   }, []);
+
+  const loadClass = async () => {
+    if (!codeInput.trim()) return;
+    setCloudLoading(true);
+    setCloudError(false);
+    const data = await fetchClassData(codeInput);
+    setCloudLoading(false);
+    if (data && data.profiles.length > 0) {
+      setCloud(data);
+      setSelectedStudent(null);
+    } else {
+      setCloudError(true);
+    }
+  };
+
+  // The whole dashboard renders from these three — local device data by
+  // default, or the linked class from the cloud once a code is loaded.
+  const profiles = cloud?.profiles ?? localProfiles;
+  const attemptsByProfile = cloud?.attemptsByProfile ?? localAttempts;
+  const matchesByProfile = cloud?.matchesByProfile ?? localMatches;
 
   const allAttempts = useMemo(
     () => [...attemptsByProfile.values()].flat().sort((a, b) => a.timestamp - b.timestamp),
@@ -67,10 +95,62 @@ export default function TeacherDashboard() {
 
   const printReport = () => window.print();
 
+  const connectPanel = (
+    <Card className="!py-4 no-print">
+      {isFirebaseEnabled() ? (
+        <div className="space-y-2">
+          <h2 className="font-extrabold text-slate-800">☁️ {t("teacher.linkTitle")}</h2>
+          <p className="text-sm text-slate-600 font-semibold">{t("teacher.linkDesc")}</p>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              void loadClass();
+            }}
+            className="flex flex-wrap gap-2 items-center"
+          >
+            <input
+              value={codeInput}
+              onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
+              placeholder={t("teacher.classCode")}
+              maxLength={20}
+              className="rounded-2xl border-2 border-slate-300 px-4 py-2 font-bold uppercase tracking-widest focus:border-blue-500 outline-none"
+              aria-label={t("teacher.classCode")}
+            />
+            <Button type="submit" disabled={cloudLoading} className="!min-h-0 !py-2 !text-sm">
+              {cloudLoading ? t("common.loading") : `🔄 ${t("teacher.load")}`}
+            </Button>
+            {cloud && (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  setCloud(null);
+                  setSelectedStudent(null);
+                }}
+                className="!min-h-0 !py-2 !text-sm"
+              >
+                💻 {t("teacher.showLocal")}
+              </Button>
+            )}
+          </form>
+          {cloud && (
+            <p className="text-sm font-bold text-green-700">
+              ✅ {t("teacher.cloudActive", { code: cloud.classCode, n: cloud.profiles.length })}
+            </p>
+          )}
+          {cloudError && <p className="text-sm font-bold text-rose-600">{t("teacher.cloudEmpty")}</p>}
+        </div>
+      ) : (
+        <p className="text-sm text-slate-600 font-semibold">🔌 {t("teacher.cloudOff")}</p>
+      )}
+    </Card>
+  );
+
   if (profiles.length === 0) {
     return (
       <main className="max-w-5xl mx-auto px-4 py-6 space-y-4">
         <Header onBack={() => router.push("/")} />
+        {connectPanel}
         <Card className="text-center py-12">
           <div className="text-5xl mb-3">🧑‍🏫</div>
           <p className="font-bold text-slate-600">{t("teacher.noStudents")}</p>
@@ -82,6 +162,8 @@ export default function TeacherDashboard() {
   return (
     <main className="max-w-5xl mx-auto px-4 py-6 space-y-4">
       <Header onBack={() => router.push("/")} />
+
+      {connectPanel}
 
       <nav className="flex gap-1 flex-wrap no-print" role="tablist">
         {TABS.map((tb) => (
