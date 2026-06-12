@@ -9,6 +9,7 @@ import type { Question } from "@/lib/question-generator/types";
 import { playCorrect, playTick, playWin, playWrong } from "@/lib/audio";
 import TugOfWarScene from "./TugOfWarScene";
 import QuestionCard from "./QuestionCard";
+import Confetti from "./Confetti";
 import FractionText from "@/components/fractions/FractionText";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -120,6 +121,7 @@ export default function MultiplayerScreen({ player1, player2, onExit }: Props) {
       rope > 0 ? t("game.winner", { name: player1 }) : rope < 0 ? t("game.winner", { name: player2 }) : t("game.draw");
     return (
       <Card className="max-w-xl mx-auto text-center space-y-5">
+        {rope !== 0 && <Confetti count={60} />}
         <div className="text-6xl">{rope === 0 ? "🤝" : "🏆"}</div>
         <h2 className="text-3xl font-extrabold text-slate-800">{headline}</h2>
         <div className="grid grid-cols-2 gap-3">

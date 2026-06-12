@@ -16,7 +16,13 @@ export const WIN_AT = 5;
 export const TIME_EASY_S = 30;
 export const TIME_CALC_S = 60;
 
-const CALCULATION_TOPICS: Topic[] = ["addition", "subtraction", "mixedNumbers", "wordProblem"];
+const CALCULATION_TOPICS: Topic[] = [
+  "addition",
+  "subtraction",
+  "mixedNumbers",
+  "fractionOfQuantity",
+  "wordProblem",
+];
 
 export function timeAllowedSeconds(topic: Topic): number {
   return CALCULATION_TOPICS.includes(topic) ? TIME_CALC_S : TIME_EASY_S;

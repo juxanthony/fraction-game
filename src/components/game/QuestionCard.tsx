@@ -47,7 +47,12 @@ export default function QuestionCard({
   };
 
   return (
-    <div className="space-y-3">
+    <motion.div
+      initial={{ opacity: 0, x: 28 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ type: "spring", stiffness: 220, damping: 24 }}
+      className="space-y-3"
+    >
       {/* prompt */}
       <div className="flex items-start gap-2">
         <h2 className="flex-1 text-xl sm:text-2xl font-bold text-slate-800 leading-relaxed">
@@ -129,26 +134,38 @@ export default function QuestionCard({
 
       {/* answer options */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" role="group" aria-label={t("game.question")}>
-        {question.options.map((opt, i) => (
-          <button
-            key={i}
-            disabled={revealed}
-            onClick={() => onAnswer(i)}
-            className={`flex items-center gap-3 rounded-2xl border-3 border-2 p-4 min-h-[3.5rem] text-lg sm:text-xl font-bold text-slate-800 transition-all ${optionClass(i)}`}
-          >
-            <span className="shrink-0 w-8 h-8 rounded-full bg-blue-600 text-white text-sm flex items-center justify-center">
-              {OPTION_LABELS[i]}
-            </span>
-            <FractionText text={opt.text} />
-            {revealed && i === question.correctIndex && <span className="ml-auto text-green-600 text-2xl">✓</span>}
-            {revealed && i === selectedIndex && i !== question.correctIndex && (
-              <span className="ml-auto text-rose-600 text-2xl">✗</span>
-            )}
-          </button>
-        ))}
+        {question.options.map((opt, i) => {
+          const isWrongPick = revealed && i === selectedIndex && i !== question.correctIndex;
+          const isCorrect = revealed && i === question.correctIndex;
+          return (
+            <motion.button
+              key={i}
+              disabled={revealed}
+              onClick={() => onAnswer(i)}
+              whileHover={revealed ? undefined : { scale: 1.03, y: -2 }}
+              whileTap={revealed ? undefined : { scale: 0.95 }}
+              animate={
+                isWrongPick
+                  ? { x: [0, -10, 10, -6, 6, 0] }
+                  : isCorrect
+                    ? { scale: [1, 1.07, 1] }
+                    : {}
+              }
+              transition={{ duration: 0.45 }}
+              className={`flex items-center gap-3 rounded-2xl border-2 p-4 min-h-[3.5rem] text-lg sm:text-xl font-bold text-slate-800 transition-colors ${optionClass(i)}`}
+            >
+              <span className="shrink-0 w-8 h-8 rounded-full bg-blue-600 text-white text-sm flex items-center justify-center">
+                {OPTION_LABELS[i]}
+              </span>
+              <FractionText text={opt.text} />
+              {isCorrect && <span className="ml-auto text-green-600 text-2xl">✓</span>}
+              {isWrongPick && <span className="ml-auto text-rose-600 text-2xl">✗</span>}
+            </motion.button>
+          );
+        })}
       </div>
 
       <p className="text-xs text-slate-500 text-center hidden sm:block">{t("game.keyboardTip")}</p>
-    </div>
+    </motion.div>
   );
 }

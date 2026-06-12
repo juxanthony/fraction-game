@@ -28,13 +28,15 @@ const en: Dictionary = {
   "level.3": "Adding Fractions",
   "level.4": "Subtracting Fractions",
   "level.5": "Mixed Numbers",
-  "level.6": "Word Problems",
+  "level.6": "Fraction of a Quantity",
+  "level.7": "Word Problems",
   "topic.compare": "Comparing Fractions",
   "topic.ordering": "Ordering Fractions",
   "topic.equivalent": "Equivalent Fractions",
   "topic.addition": "Adding Fractions",
   "topic.subtraction": "Subtracting Fractions",
   "topic.mixedNumbers": "Mixed Numbers",
+  "topic.fractionOfQuantity": "Fraction of a Quantity",
   "topic.wordProblem": "Word Problems",
 
   /* Question prompts */
@@ -44,9 +46,12 @@ const en: Dictionary = {
   "q.order.desc": "Arrange the fractions from largest to smallest.",
   "q.equivalent": "Which fraction is equivalent to {a}?",
   "q.addition": "{a} + {b} = ?",
+  "q.addition3": "{a} + {b} + {c} = ?",
   "q.subtraction": "{a} − {b} = ?",
+  "q.subtraction3": "{a} − {b} − {c} = ?",
   "q.toMixed": "Convert {a} to a mixed number.",
   "q.toImproper": "Convert {a} to an improper fraction.",
+  "q.ofQuantity": "What is {a} of {q}?",
 
   /* Word problems (RME contexts) */
   "wp.cake": "{name} ate {a} of a cake. Her brother ate {b} of the same cake. How much of the cake was eaten altogether?",
@@ -61,6 +66,9 @@ const en: Dictionary = {
   "wp.journey": "The journey from {name}'s house to school is {a} km. The school bus has travelled {b} km. How much further must the bus travel?",
   "wp.reading": "{name} has read {b} of a storybook. What fraction of the book is NOT read yet?",
   "wp.garden": "{name} watered {b} of the plants in the garden. What fraction of the plants has not been watered?",
+  "wp.marbles": "{name} has {q} marbles. {a} of them are blue. How many blue marbles are there?",
+  "wp.pupils": "There are {q} pupils at the school assembly. {a} of them are boys. How many boys are at the assembly?",
+  "wp.money": "{name} saves RM{q} and spends {a} of the savings on a storybook. How much money is spent?",
 
   /* Explanations */
   "exp.compare.sameDen": "All fractions have the same denominator, so compare the numerators: the bigger the numerator, the bigger the fraction. The answer is {answer}.",
@@ -76,6 +84,13 @@ const en: Dictionary = {
   "exp.toImproper": "Multiply the whole number by the denominator: {whole} × {den} = {product}. Add the numerator {num}. So the improper fraction is {answer}.",
   "exp.wp.add": "The word 'altogether' tells us to ADD: {a} + {b} = {answer}.",
   "exp.wp.sub": "To find what is left, SUBTRACT: {a} − {b} = {answer}.",
+  "exp.add.mixed": "Keep the whole number {whole}. Add the fraction parts: {fa} + {b} = {fs}. The answer is {answer}.",
+  "exp.add.three": "Add step by step: {a} + {b} = {ab}, then {ab} + {c} = {answer}.",
+  "exp.sub.mixed": "Change {a} into the improper fraction {imp}. Then subtract: {imp} − {b} = {answer}.",
+  "exp.sub.whole": "Write {w} as the fraction {impW}. Then subtract: {impW} − {b} = {answer}.",
+  "exp.sub.three": "Subtract step by step: {a} − {b} = {ab}, then {ab} − {c} = {answer}.",
+  "exp.ofQuantity": "Divide the quantity by the denominator: {q} ÷ {den} = {unit}. Then multiply by the numerator: {num} × {unit} = {answer}.",
+  "exp.wp.of": "'Of' tells us to find a part of the quantity: {q} ÷ {den} = {unit}, then {num} × {unit} = {answer}.",
 
   /* Hints */
   "hint.compare.sameDen": "Same denominator? Just look at the numerators!",
@@ -91,15 +106,28 @@ const en: Dictionary = {
   "hint.toImproper": "Whole × denominator + numerator.",
   "hint.wp.add": "'Altogether' means we add the two fractions.",
   "hint.wp.sub": "'Left over' means we subtract.",
+  "hint.add.mixed": "Add the whole number and the fraction parts separately.",
+  "hint.add.three": "Add the first two numbers, then add the third.",
+  "hint.sub.mixed": "Change the mixed number into an improper fraction first.",
+  "hint.sub.whole": "Write the whole number as a fraction with the same denominator.",
+  "hint.sub.three": "Subtract one number at a time, from left to right.",
+  "hint.ofQuantity": "Divide by {den} first to find one part, then multiply by {num}.",
+  "hint.wp.of": "'Of' means: quantity ÷ denominator × numerator.",
 
-  /* Learning objectives (KSSR Year 5) */
+  /* Learning objectives (KSSR Year 5, Semakan 2017 — DSKP codes) */
   "obj.compare": "KSSR Y5 · Fractions: compare the values of proper fractions",
   "obj.order": "KSSR Y5 · Fractions: arrange fractions in order of value",
   "obj.equivalent": "KSSR Y5 · Fractions: recognise and name equivalent fractions",
-  "obj.add": "KSSR Y5 · Fractions: add proper fractions and mixed numbers",
-  "obj.sub": "KSSR Y5 · Fractions: subtract proper fractions and mixed numbers",
+  "obj.add.same": "KSSR Y5 · 7.1.2: Add two proper fractions with the same denominator",
+  "obj.add.unlike": "KSSR Y5 · 7.1.3: Add two proper fractions with different denominators",
+  "obj.add.mixed": "KSSR Y5 · 7.1.4: Add a mixed number and a proper fraction",
+  "obj.add.three": "KSSR Y5 · 7.1.1: Add up to three numbers (whole numbers, proper fractions, mixed numbers; denominators up to 10)",
+  "obj.sub.proper": "KSSR Y5 · 7.2.2: Subtract two proper fractions with the same or different denominators",
+  "obj.sub.mixed": "KSSR Y5 · 7.2.3: Subtract a proper fraction from a mixed number",
+  "obj.sub.three": "KSSR Y5 · 7.2.1: Subtract up to three numbers involving whole numbers, proper fractions and mixed numbers",
+  "obj.ofQuantity": "KSSR Y5 · 7.3.1: Determine the value of a proper fraction of a quantity",
   "obj.mixed": "KSSR Y5 · Fractions: convert between improper fractions and mixed numbers",
-  "obj.word": "KSSR Y5 · Fractions: solve daily-life problems involving fractions (KBAT)",
+  "obj.word": "KSSR Y5 · Fractions: solve daily-life problems involving fractions (integrated problem solving, KBAT)",
 
   /* Polya model */
   "polya.title": "Polya's 4 Steps",
@@ -115,6 +143,10 @@ const en: Dictionary = {
   "polya.sub.plan": "Words like 'left' and 'remaining' tell us to use SUBTRACTION.",
   "polya.sub.carry": "Calculate {a} − {b}. If the denominators are different, make them the same first.",
   "polya.sub.lookback": "Check: {answer} + {b} should bring us back to {a}.",
+  "polya.of.understand": "We know the total is {q} and we need {a} of it.",
+  "polya.of.plan": "'Of' means: divide the total into {den} equal parts, then take {num} parts.",
+  "polya.of.carry": "{q} ÷ {den} = {unit}, then {num} × {unit} = {answer}.",
+  "polya.of.lookback": "Check: {answer} should be less than the total {q}.",
 
   /* Game */
   "game.score": "Score",
@@ -189,6 +221,10 @@ const en: Dictionary = {
   "notes.wordProblem.steps": "1. Understand: what do we know? What must we find?\n2. Plan: choose the operation — 'altogether' or 'total' means add; 'left' or 'remaining' means subtract.\n3. Carry out the plan: do the calculation carefully.\n4. Look back: does the answer make sense?",
   "notes.wordProblem.example": "Mei Ling ate 2/5 of a cake and her brother ate 1/5. Altogether: 2/5 + 1/5 = 3/5 of the cake.",
   "notes.wordProblem.tip": "Underline the keywords in the question before you start calculating.",
+  "notes.fractionOfQuantity.concept": "A fraction OF a quantity tells us the value of a part, e.g. 2/5 of 50. The word 'of' means the quantity is divided into equal parts.",
+  "notes.fractionOfQuantity.steps": "1. Divide the quantity by the denominator to find ONE part.\n2. Multiply by the numerator to find the number of parts you need.",
+  "notes.fractionOfQuantity.example": "2/5 of 50: 50 ÷ 5 = 10, then 2 × 10 = 20. So 2/5 of 50 = 20.",
+  "notes.fractionOfQuantity.tip": "Check your answer: for a proper fraction it must be smaller than the whole quantity.",
 
   /* Challenge */
   "challenge.title": "Challenge Mode",
@@ -333,6 +369,8 @@ const en: Dictionary = {
   "err.swapped-parts": "Swapped whole number and numerator",
   "err.wrong-whole": "Wrong whole-number part",
   "err.reversed-order": "Ordered in the opposite direction",
+  "err.unit-fraction-only": "Found one part (1/d of the quantity) but forgot to multiply by the numerator",
+  "err.found-remainder": "Found the remaining part instead of the part asked for",
   "err.random-near": "Other / careless mistake",
   "err.timeout": "Ran out of time",
 

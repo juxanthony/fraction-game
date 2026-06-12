@@ -1,6 +1,6 @@
 import type { Fraction } from "@/lib/math/fraction";
 
-/** Curriculum topics (KSSR Mathematics Year 5 — Fractions). */
+/** Curriculum topics (KSSR Mathematics Year 5, Semakan 2017 — Tajuk 7: Pecahan). */
 export type Topic =
   | "compare"
   | "ordering"
@@ -8,6 +8,7 @@ export type Topic =
   | "addition"
   | "subtraction"
   | "mixedNumbers"
+  | "fractionOfQuantity"
   | "wordProblem";
 
 /** Misconception tags attached to distractors, used for error-pattern analytics. */
@@ -25,6 +26,8 @@ export type ErrorTag =
   | "swapped-parts"
   | "wrong-whole"
   | "reversed-order"
+  | "unit-fraction-only"
+  | "found-remainder"
   | "random-near";
 
 export interface Option {
@@ -85,5 +88,6 @@ export const GAME_LEVELS: { level: number; topic: Topic; labelKey: string }[] = 
   { level: 3, topic: "addition", labelKey: "level.3" },
   { level: 4, topic: "subtraction", labelKey: "level.4" },
   { level: 5, topic: "mixedNumbers", labelKey: "level.5" },
-  { level: 6, topic: "wordProblem", labelKey: "level.6" },
+  { level: 6, topic: "fractionOfQuantity", labelKey: "level.6" },
+  { level: 7, topic: "wordProblem", labelKey: "level.7" },
 ];

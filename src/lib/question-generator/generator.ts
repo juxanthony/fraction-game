@@ -37,8 +37,9 @@ type Difficulty = 1 | 2 | 3;
 /* helpers                                                             */
 /* ------------------------------------------------------------------ */
 
+/* KSSR Year 5 works with denominators up to 10 (DSKP 7.1.1). */
 const SIMPLE_DENS = [2, 3, 4, 5, 6, 8];
-const ALL_DENS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 12];
+const ALL_DENS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 function properFraction(maxDen: number, minDen = 2): Fraction {
   const den = randInt(minDen, maxDen);
@@ -176,7 +177,7 @@ function genOrdering(difficulty: Difficulty): Question {
   const sameDen = difficulty < 3;
   let fracs: Fraction[] = [];
   if (sameDen) {
-    const den = pick([6, 8, 10, 12]);
+    const den = pick([6, 8, 9, 10]);
     const nums = shuffle(Array.from({ length: den - 1 }, (_, i) => i + 1)).slice(0, 3);
     fracs = nums.map((num) => ({ num, den }));
   } else {
@@ -299,6 +300,14 @@ function properInDen(den: number): Fraction {
 }
 
 function genAddition(difficulty: Difficulty): Question {
+  // DSKP coverage: 7.1.2 (same den), 7.1.3 (unlike dens),
+  // 7.1.4 (mixed + proper), 7.1.1 (up to three numbers incl. wholes).
+  if (difficulty === 2 && Math.random() < 0.4) return genAddMixedProper(2);
+  if (difficulty === 3) {
+    const r = Math.random();
+    if (r < 0.4) return genAddThreeNumbers();
+    if (r < 0.7) return genAddMixedProper(3);
+  }
   const [a, b] = additionPair(difficulty);
   const result = add(a, b);
   const correct = isImproperDisplay(result);
@@ -337,12 +346,129 @@ function genAddition(difficulty: Difficulty): Question {
     },
     hintKey: a.den === b.den ? "hint.add.sameDen" : "hint.add.unlike",
     hintParams: { common },
-    objectiveKey: "obj.add",
+    objectiveKey: a.den === b.den ? "obj.add.same" : "obj.add.unlike",
     visual: a.den === b.den ? { kind: "bar", fractions: [a, b, result], labels: [fToString(a), fToString(b), "?"] } : undefined,
   };
 }
 
+/** 7.1.4 — mixed number + proper fraction (fraction parts kept proper, no carrying). */
+function genAddMixedProper(difficulty: Difficulty): Question {
+  const den = pick([3, 4, 5, 6, 8, 10]);
+  const whole = randInt(1, 3);
+  let fa: Fraction;
+  let b: Fraction;
+  if (difficulty === 2) {
+    const n1 = randInt(1, den - 2);
+    fa = { num: n1, den };
+    b = { num: randInt(1, den - n1 - 1), den };
+  } else {
+    // unlike denominators; keep the fraction-part sum below 1
+    fa = { num: 1, den };
+    let denB = pick([3, 4, 5, 6, 8, 10].filter((d) => d !== den));
+    let guard = 0;
+    b = { num: 1, den: denB };
+    while (guard++ < 50) {
+      const cand = properInDen(denB);
+      if (value(fa) + value(cand) < 1) {
+        b = cand;
+        break;
+      }
+      denB = pick([4, 5, 6, 8, 10].filter((d) => d !== den));
+    }
+  }
+  const fs = add(fa, b);
+  const total = add(fromMixed({ whole, num: fa.num, den: fa.den }), b);
+  const correct = mixedToString(toMixed(total));
+  const aStr = mixedToString({ whole, num: fa.num, den: fa.den });
+
+  const distractorPool: { text: string; errorTag: ErrorTag }[] = [
+    { text: fToString(fs), errorTag: "wrong-whole" }, // dropped the whole number
+    { text: mixedToString({ whole: whole + 1, num: fs.num, den: fs.den }), errorTag: "wrong-whole" },
+    {
+      text: mixedToString(toMixed(simplify({ num: (fa.num + b.num) * 1 + whole * (fa.den + b.den), den: fa.den + b.den }))),
+      errorTag: "added-denominators",
+    },
+    { text: mixedToString({ whole, num: Math.min(fs.num + 1, Math.max(1, fs.den - 1)), den: fs.den }), errorTag: "off-by-one" },
+  ];
+
+  const { options, correctIndex } = buildOptions(correct, distractorPool, () => nearbyFraction(total));
+  return {
+    id: uid(),
+    topic: "addition",
+    level: 3,
+    difficulty,
+    promptKey: "q.addition",
+    promptParams: { a: aStr, b: fToString(b) },
+    options,
+    correctIndex,
+    explanationKey: "exp.add.mixed",
+    explanationParams: { whole, fa: fToString(fa), b: fToString(b), fs: fToString(fs), answer: correct },
+    hintKey: "hint.add.mixed",
+    hintParams: {},
+    objectiveKey: "obj.add.mixed",
+  };
+}
+
+/** 7.1.1 — add up to three numbers (whole numbers + proper fractions, den ≤ 10). */
+function genAddThreeNumbers(): Question {
+  const den = pick([4, 5, 6, 8, 10]);
+  const withWhole = Math.random() < 0.5;
+  const a = properInDen(den);
+  const b = properInDen(den);
+  const firstTerm = withWhole ? String(randInt(1, 2)) : fToString(properInDen(den));
+  const firstFrac: Fraction = withWhole
+    ? { num: Number(firstTerm) * den, den }
+    : (() => {
+        const [n, d] = firstTerm.split("/").map(Number);
+        return { num: n, den: d };
+      })();
+
+  const ab = add(firstFrac, a);
+  const total = add(ab, b);
+  const correct = isImproperDisplay(total);
+  const abDisplay = isImproperDisplay(ab);
+
+  const distractorPool: { text: string; errorTag: ErrorTag }[] = [
+    {
+      text: fToString(simplify({ num: firstFrac.num + a.num + b.num, den: den * 3 })),
+      errorTag: "added-denominators",
+    },
+    { text: isImproperDisplay(simplify({ num: total.num + 1, den: total.den })), errorTag: "off-by-one" },
+    {
+      text: isImproperDisplay(simplify({ num: Math.max(1, total.num - total.den), den: total.den })),
+      errorTag: "wrong-whole",
+    },
+  ];
+
+  const { options, correctIndex } = buildOptions(correct, dedupeByValue(distractorPool, total), () =>
+    nearbyFraction(total)
+  );
+  return {
+    id: uid(),
+    topic: "addition",
+    level: 3,
+    difficulty: 3,
+    promptKey: "q.addition3",
+    promptParams: { a: firstTerm, b: fToString(a), c: fToString(b) },
+    options,
+    correctIndex,
+    explanationKey: "exp.add.three",
+    explanationParams: { a: firstTerm, b: fToString(a), ab: abDisplay, c: fToString(b), answer: correct },
+    hintKey: "hint.add.three",
+    hintParams: {},
+    objectiveKey: "obj.add.three",
+  };
+}
+
 function genSubtraction(difficulty: Difficulty): Question {
+  // DSKP coverage: 7.2.2 (proper fractions, same & different dens),
+  // 7.2.3 (mixed − proper), 7.2.1 (whole numbers / up to three numbers).
+  if (difficulty === 2 && Math.random() < 0.4) return genSubMixedProper(2);
+  if (difficulty === 3) {
+    const r = Math.random();
+    if (r < 0.4) return genSubWholeNumbers();
+    if (r < 0.7) return genSubMixedProper(3);
+  }
   let a: Fraction, b: Fraction;
   if (difficulty === 1) {
     const den = pick(SIMPLE_DENS.filter((d) => d >= 4));
@@ -405,8 +531,145 @@ function genSubtraction(difficulty: Difficulty): Question {
     },
     hintKey: a.den === b.den ? "hint.sub.sameDen" : "hint.sub.unlike",
     hintParams: { common },
-    objectiveKey: "obj.sub",
+    objectiveKey: "obj.sub.proper",
     visual: a.den === b.den ? { kind: "bar", fractions: [a, b, result], labels: [fToString(a), fToString(b), "?"] } : undefined,
+  };
+}
+
+/** 7.2.3 — mixed number − proper fraction. */
+function genSubMixedProper(difficulty: Difficulty): Question {
+  const den = pick([3, 4, 5, 6, 8, 10]);
+  const whole = randInt(1, 3);
+  const numM = randInt(1, den - 1);
+  const m = { whole, num: numM, den };
+  const imp = fromMixed(m);
+  const b =
+    difficulty === 2
+      ? { num: randInt(1, den - 1), den }
+      : properInDen(pick([3, 4, 5, 6, 8, 10].filter((d) => d !== den)));
+  const result = sub(imp, b);
+  const correct = isImproperDisplay(result);
+  const aStr = mixedToString(m);
+
+  const distractorPool: { text: string; errorTag: ErrorTag }[] = [
+    // subtracted the smaller numerator from the bigger, ignoring the borrow/conversion
+    ...(b.den === den
+      ? [
+          {
+            text: mixedToString({ whole, num: Math.abs(numM - b.num) || 1, den }),
+            errorTag: "denominator-confusion" as ErrorTag,
+          },
+        ]
+      : [
+          {
+            text: safeFrac(imp.num - b.num, Math.abs(imp.den - b.den)),
+            errorTag: "subtracted-denominators" as ErrorTag,
+          },
+        ]),
+    { text: isImproperDisplay(simplify({ num: result.num + 1, den: result.den })), errorTag: "off-by-one" },
+    {
+      text: mixedToString({ whole: whole + 1, num: Math.max(1, Math.abs(numM - b.num) || 1), den }),
+      errorTag: "wrong-whole",
+    },
+  ];
+
+  const { options, correctIndex } = buildOptions(
+    correct,
+    dedupeByValue(distractorPool.filter((d) => d.text !== ""), result),
+    () => nearbyFraction(result)
+  );
+  return {
+    id: uid(),
+    topic: "subtraction",
+    level: 4,
+    difficulty,
+    promptKey: "q.subtraction",
+    promptParams: { a: aStr, b: fToString(b) },
+    options,
+    correctIndex,
+    explanationKey: "exp.sub.mixed",
+    explanationParams: { a: aStr, imp: fToString(imp), b: fToString(b), answer: correct },
+    hintKey: "hint.sub.mixed",
+    hintParams: {},
+    objectiveKey: "obj.sub.mixed",
+  };
+}
+
+/** 7.2.1 — subtraction involving whole numbers, up to three numbers. */
+function genSubWholeNumbers(): Question {
+  const den = pick([4, 5, 6, 8, 10]);
+  const w = randInt(1, 3);
+  const threeTerms = Math.random() < 0.5;
+  const b = properInDen(den);
+  const whole: Fraction = { num: w * den, den };
+
+  if (!threeTerms) {
+    const result = sub(whole, b);
+    const correct = isImproperDisplay(result);
+    const distractorPool: { text: string; errorTag: ErrorTag }[] = [
+      { text: mixedToString({ whole: w, num: b.num, den }), errorTag: "denominator-confusion" },
+      { text: isImproperDisplay(simplify({ num: result.num + 1, den: result.den })), errorTag: "off-by-one" },
+      {
+        text: isImproperDisplay(simplify({ num: Math.max(1, result.num - den), den } )),
+        errorTag: "wrong-whole",
+      },
+    ];
+    const { options, correctIndex } = buildOptions(correct, dedupeByValue(distractorPool, result), () =>
+      nearbyFraction(result)
+    );
+    return {
+      id: uid(),
+      topic: "subtraction",
+      level: 4,
+      difficulty: 3,
+      promptKey: "q.subtraction",
+      promptParams: { a: String(w), b: fToString(b) },
+      options,
+      correctIndex,
+      explanationKey: "exp.sub.whole",
+      explanationParams: { w, impW: `${w * den}/${den}`, b: fToString(b), answer: correct },
+      hintKey: "hint.sub.whole",
+      hintParams: {},
+      objectiveKey: "obj.sub.three",
+    };
+  }
+
+  // w − b − c, kept non-negative
+  let c = properInDen(den);
+  let guard = 0;
+  while (b.num + c.num >= w * den && guard++ < 50) c = properInDen(den);
+  if (b.num + c.num >= w * den) c = { num: 1, den };
+  const ab = sub(whole, b);
+  const result = sub(ab, c);
+  const correct = isImproperDisplay(result);
+  const distractorPool: { text: string; errorTag: ErrorTag }[] = [
+    {
+      text: isImproperDisplay(simplify({ num: w * den - b.num + c.num, den })),
+      errorTag: "denominator-confusion", // added the last number instead of subtracting
+    },
+    { text: isImproperDisplay(simplify({ num: result.num + 1, den: result.den })), errorTag: "off-by-one" },
+    {
+      text: isImproperDisplay(simplify({ num: Math.max(1, result.num - den), den })),
+      errorTag: "wrong-whole",
+    },
+  ];
+  const { options, correctIndex } = buildOptions(correct, dedupeByValue(distractorPool, result), () =>
+    nearbyFraction(result)
+  );
+  return {
+    id: uid(),
+    topic: "subtraction",
+    level: 4,
+    difficulty: 3,
+    promptKey: "q.subtraction3",
+    promptParams: { a: String(w), b: fToString(b), c: fToString(c) },
+    options,
+    correctIndex,
+    explanationKey: "exp.sub.three",
+    explanationParams: { a: String(w), b: fToString(b), ab: isImproperDisplay(ab), c: fToString(c), answer: correct },
+    hintKey: "hint.sub.three",
+    hintParams: {},
+    objectiveKey: "obj.sub.three",
   };
 }
 
@@ -506,7 +769,66 @@ function genMixedNumbers(difficulty: Difficulty): Question {
 }
 
 /* ------------------------------------------------------------------ */
-/* Level 6 — Word problems (RME contexts + Polya scaffold)             */
+/* Level 6 — Fraction of a quantity (DSKP 7.3.1, e.g. 2/5 of 50)       */
+/* ------------------------------------------------------------------ */
+
+function coprimeProper(dens: number[]): Fraction {
+  let f = properInDen(pick(dens));
+  let guard = 0;
+  while (gcd(f.num, f.den) !== 1 && guard++ < 30) f = properInDen(pick(dens));
+  return simplify(f);
+}
+
+function quantityFor(f: Fraction, difficulty: Difficulty): { q: number; unit: number } {
+  const unit =
+    difficulty === 1 ? randInt(2, 6) : difficulty === 2 ? randInt(3, 10) : randInt(5, 12);
+  return { q: f.den * unit, unit };
+}
+
+function quantityOptions(
+  answer: number,
+  unit: number,
+  q: number,
+  num: number
+): { options: Option[]; correctIndex: number } {
+  const distractorPool: { text: string; errorTag: ErrorTag }[] = [
+    ...(num > 1 ? [{ text: String(unit), errorTag: "unit-fraction-only" as ErrorTag }] : []),
+    { text: String(q - answer), errorTag: "found-remainder" },
+    { text: String(answer + unit), errorTag: "off-by-one" },
+    { text: String(Math.max(1, answer - unit)), errorTag: "off-by-one" },
+  ];
+  return buildOptions(String(answer), distractorPool, () => {
+    const tweak = answer + pick([-3, -2, -1, 1, 2, 3, unit, -unit]);
+    return String(Math.max(1, tweak));
+  });
+}
+
+function genFractionOfQuantity(difficulty: Difficulty): Question {
+  const f = coprimeProper(difficulty === 1 ? [2, 3, 4, 5] : [3, 4, 5, 6, 8, 10]);
+  const { q, unit } = quantityFor(f, difficulty);
+  const answer = f.num * unit;
+  const { options, correctIndex } = quantityOptions(answer, unit, q, f.num);
+
+  return {
+    id: uid(),
+    topic: "fractionOfQuantity",
+    level: 6,
+    difficulty,
+    promptKey: "q.ofQuantity",
+    promptParams: { a: fToString(f), q },
+    options,
+    correctIndex,
+    explanationKey: "exp.ofQuantity",
+    explanationParams: { q, den: f.den, unit, num: f.num, answer },
+    hintKey: "hint.ofQuantity",
+    hintParams: { den: f.den, num: f.num },
+    objectiveKey: "obj.ofQuantity",
+    visual: { kind: "bar", fractions: [f], labels: [fToString(f)] },
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* Level 7 — Word problems (RME contexts + Polya scaffold)             */
 /* ------------------------------------------------------------------ */
 
 function genWordProblem(difficulty: Difficulty): Question {
@@ -515,17 +837,48 @@ function genWordProblem(difficulty: Difficulty): Question {
   let name2 = pick(PUPIL_NAMES);
   while (name2 === name) name2 = pick(PUPIL_NAMES);
 
+  // Integrated problem solving for DSKP 7.3: "fraction OF a quantity" stories.
+  if (template.op === "of") {
+    const f = coprimeProper(difficulty === 1 ? [2, 4, 5] : [3, 4, 5, 6, 8, 10]);
+    const { q, unit } = quantityFor(f, difficulty);
+    const answer = f.num * unit;
+    const { options, correctIndex } = quantityOptions(answer, unit, q, f.num);
+    const params = { name, q, a: fToString(f), den: f.den, num: f.num, unit, answer };
+    return {
+      id: uid(),
+      topic: "wordProblem",
+      level: 7,
+      difficulty,
+      promptKey: `wp.${template.id}`,
+      promptParams: params,
+      options,
+      correctIndex,
+      explanationKey: "exp.wp.of",
+      explanationParams: params,
+      hintKey: "hint.wp.of",
+      hintParams: {},
+      objectiveKey: "obj.word",
+      visual: { kind: "bar", fractions: [f], labels: [fToString(f)] },
+      polya: {
+        understand: { key: "polya.of.understand", params },
+        plan: { key: "polya.of.plan", params },
+        carryOut: { key: "polya.of.carry", params },
+        lookBack: { key: "polya.of.lookback", params },
+      },
+    };
+  }
+
   let a: Fraction, b: Fraction;
   if (template.op === "add") {
     [a, b] = additionPair(difficulty);
   } else if (template.fromWhole) {
     // remaining from a whole: 1 − a
     a = { num: 1, den: 1 };
-    const den = pick(difficulty === 1 ? [4, 5, 6] : [6, 8, 10, 12]);
+    const den = pick(difficulty === 1 ? [4, 5, 6] : [6, 8, 9, 10]);
     b = { num: randInt(1, den - 1), den };
   } else {
     const den =
-      difficulty === 1 ? pick([4, 5, 6, 8]) : pick([6, 8, 10, 12]);
+      difficulty === 1 ? pick([4, 5, 6, 8]) : pick([6, 8, 9, 10]);
     const n1 = randInt(2, den - 1);
     const n2 = randInt(1, n1 - 1);
     a = { num: n1, den };
@@ -578,7 +931,7 @@ function genWordProblem(difficulty: Difficulty): Question {
   return {
     id: uid(),
     topic: "wordProblem",
-    level: 6,
+    level: 7,
     difficulty,
     promptKey: `wp.${template.id}`,
     promptParams: params,
@@ -614,6 +967,8 @@ export function generateQuestion(level: number, difficulty: Difficulty): Questio
     case 5:
       return genMixedNumbers(difficulty);
     case 6:
+      return genFractionOfQuantity(difficulty);
+    case 7:
       return genWordProblem(difficulty);
     default:
       return genCompare(1);
@@ -632,6 +987,6 @@ export function questionForTurn(
   const progress = total > 1 ? index / (total - 1) : 0;
   const ramp = (Math.min(3, Math.max(1, Math.ceil(progress * 3))) || 1) as Difficulty;
   const difficulty = (Math.max(ramp, opts.minDifficulty ?? 1)) as Difficulty;
-  const level = opts.level ?? Math.min(6, 1 + Math.floor(progress * 6));
+  const level = opts.level ?? Math.min(7, 1 + Math.floor(progress * 7));
   return generateQuestion(level, difficulty);
 }

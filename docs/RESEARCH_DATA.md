@@ -25,8 +25,8 @@ Fraction Tug of War records every pupil's **problem-solving pathway** at the att
 | `class` | string | Class label as entered at profile creation |
 | `timestamp_iso` | ISO 8601 | Attempt time |
 | `session_mode` | factor | practice · challenge · tournament · multiplayer |
-| `topic` | factor | compare · ordering · equivalent · addition · subtraction · mixedNumbers · wordProblem |
-| `curriculum_level` | 1–6 | Game level (maps to KSSR fraction skills) |
+| `topic` | factor | compare · ordering · equivalent · addition · subtraction · mixedNumbers · fractionOfQuantity · wordProblem |
+| `curriculum_level` | 1–7 | Game level (maps to KSSR fraction skills) |
 | `item_difficulty` | 1–3 | Within-level difficulty band |
 | `is_correct` | 0/1 | Outcome |
 | `error_pattern` | factor | Misconception code (empty when correct) |
@@ -47,6 +47,8 @@ Fraction Tug of War records every pupil's **problem-solving pathway** at the att
 | `lesser-value` / `greater-value` | Magnitude comparison error |
 | `swapped-parts` / `wrong-whole` | Mixed-number structure errors |
 | `reversed-order` | Ordered in the opposite direction |
+| `unit-fraction-only` | Found 1/d of the quantity but did not multiply by the numerator |
+| `found-remainder` | Found the remaining part of the quantity instead of the asked part |
 | `off-by-one` | Procedural slip |
 | `random-near` | Unclassified/careless |
 | `timeout` | No answer within the time limit |

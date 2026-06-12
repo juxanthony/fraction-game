@@ -28,13 +28,15 @@ const zh: Dictionary = {
   "level.3": "分数加法",
   "level.4": "分数减法",
   "level.5": "带分数",
-  "level.6": "应用题",
+  "level.6": "数量的几分之几",
+  "level.7": "应用题",
   "topic.compare": "比较分数",
   "topic.ordering": "排列分数",
   "topic.equivalent": "等值分数",
   "topic.addition": "分数加法",
   "topic.subtraction": "分数减法",
   "topic.mixedNumbers": "带分数",
+  "topic.fractionOfQuantity": "数量的几分之几",
   "topic.wordProblem": "应用题",
 
   /* Question prompts */
@@ -44,9 +46,12 @@ const zh: Dictionary = {
   "q.order.desc": "把分数从大到小排列。",
   "q.equivalent": "哪一个分数与 {a} 等值？",
   "q.addition": "{a} + {b} = ?",
+  "q.addition3": "{a} + {b} + {c} = ?",
   "q.subtraction": "{a} − {b} = ?",
+  "q.subtraction3": "{a} − {b} − {c} = ?",
   "q.toMixed": "把 {a} 化为带分数。",
   "q.toImproper": "把 {a} 化为假分数。",
+  "q.ofQuantity": "{q} 的 {a} 是多少？",
 
   /* Word problems (RME contexts) */
   "wp.cake": "{name}吃了一个蛋糕的 {a}，她的弟弟吃了同一个蛋糕的 {b}。他们一共吃了这个蛋糕的几分之几？",
@@ -61,6 +66,9 @@ const zh: Dictionary = {
   "wp.journey": "从{name}的家到学校的路程是 {a} 公里。校车已经行驶了 {b} 公里。校车还要行驶多少公里？",
   "wp.reading": "{name}已经读了一本故事书的 {b}。这本书还有几分之几没有读？",
   "wp.garden": "{name}给花园里 {b} 的植物浇了水。还有几分之几的植物没有浇水？",
+  "wp.marbles": "{name}有 {q} 颗弹珠，其中 {a} 是蓝色的。蓝色弹珠有多少颗？",
+  "wp.pupils": "学校集会上有 {q} 名学生，其中 {a} 是男生。集会上有多少名男生？",
+  "wp.money": "{name}存了 {q} 令吉，用了储蓄的 {a} 买一本故事书。{name}花了多少钱？",
 
   /* Explanations */
   "exp.compare.sameDen": "所有分数的分母相同，所以只要比较分子：分子越大，分数就越大。答案是 {answer}。",
@@ -76,6 +84,13 @@ const zh: Dictionary = {
   "exp.toImproper": "把整数乘以分母：{whole} × {den} = {product}，再加上分子 {num}。所以假分数是 {answer}。",
   "exp.wp.add": "“一共”这个词告诉我们要用加法：{a} + {b} = {answer}。",
   "exp.wp.sub": "要求“剩下多少”，就要用减法：{a} − {b} = {answer}。",
+  "exp.add.mixed": "整数 {whole} 保持不变。把分数部分相加：{fa} + {b} = {fs}。答案是 {answer}。",
+  "exp.add.three": "一步一步地加：{a} + {b} = {ab}，再 {ab} + {c} = {answer}。",
+  "exp.sub.mixed": "把 {a} 化成假分数 {imp}，然后相减：{imp} − {b} = {answer}。",
+  "exp.sub.whole": "把 {w} 写成分数 {impW}，然后相减：{impW} − {b} = {answer}。",
+  "exp.sub.three": "一步一步地减：{a} − {b} = {ab}，再 {ab} − {c} = {answer}。",
+  "exp.ofQuantity": "用数量除以分母：{q} ÷ {den} = {unit}。再乘以分子：{num} × {unit} = {answer}。",
+  "exp.wp.of": "求“数量的几分之几”就是求数量的一部分：{q} ÷ {den} = {unit}，再 {num} × {unit} = {answer}。",
 
   /* Hints */
   "hint.compare.sameDen": "分母相同？只要看分子就行了！",
@@ -91,15 +106,28 @@ const zh: Dictionary = {
   "hint.toImproper": "整数 × 分母 + 分子。",
   "hint.wp.add": "“一共”表示要把两个分数相加。",
   "hint.wp.sub": "“剩下”表示要相减。",
+  "hint.add.mixed": "把整数和分数部分分开相加。",
+  "hint.add.three": "先把前两个数相加，再加第三个。",
+  "hint.sub.mixed": "先把带分数化成假分数。",
+  "hint.sub.whole": "把整数写成同分母的分数。",
+  "hint.sub.three": "从左到右，一次减一个数。",
+  "hint.ofQuantity": "先除以 {den} 求出一份，再乘以 {num}。",
+  "hint.wp.of": "“的几分之几”表示：数量 ÷ 分母 × 分子。",
 
-  /* Learning objectives (KSSR Year 5) */
+  /* Learning objectives (KSSR Year 5, Semakan 2017 — DSKP codes) */
   "obj.compare": "KSSR 五年级 · 分数：比较真分数的大小",
   "obj.order": "KSSR 五年级 · 分数：按大小排列分数",
   "obj.equivalent": "KSSR 五年级 · 分数：认识和说出等值分数",
-  "obj.add": "KSSR 五年级 · 分数：真分数与带分数的加法",
-  "obj.sub": "KSSR 五年级 · 分数：真分数与带分数的减法",
+  "obj.add.same": "KSSR 五年级 · 7.1.2：同分母真分数的加法",
+  "obj.add.unlike": "KSSR 五年级 · 7.1.3：异分母真分数的加法",
+  "obj.add.mixed": "KSSR 五年级 · 7.1.4：带分数与真分数的加法",
+  "obj.add.three": "KSSR 五年级 · 7.1.1：最多三个数的加法（整数、真分数、带分数；分母不超过 10）",
+  "obj.sub.proper": "KSSR 五年级 · 7.2.2：同分母与异分母真分数的减法",
+  "obj.sub.mixed": "KSSR 五年级 · 7.2.3：带分数减真分数",
+  "obj.sub.three": "KSSR 五年级 · 7.2.1：最多三个数的减法（涉及整数、真分数和带分数）",
+  "obj.ofQuantity": "KSSR 五年级 · 7.3.1：求一个数量的几分之几的值",
   "obj.mixed": "KSSR 五年级 · 分数：假分数与带分数的互化",
-  "obj.word": "KSSR 五年级 · 分数：解决与分数有关的日常生活问题（KBAT）",
+  "obj.word": "KSSR 五年级 · 分数：解决与分数有关的日常生活问题（综合解题，KBAT）",
 
   /* Polya model */
   "polya.title": "波利亚解题四步骤",
@@ -115,6 +143,10 @@ const zh: Dictionary = {
   "polya.sub.plan": "“剩下”、“还有”这些词告诉我们要用减法。",
   "polya.sub.carry": "计算 {a} − {b}。如果分母不同，先化成相同的分母。",
   "polya.sub.lookback": "检查：{answer} + {b} 应该等于 {a}。",
+  "polya.of.understand": "我们知道总数是 {q}，要求它的 {a}。",
+  "polya.of.plan": "“的几分之几”表示：把总数平均分成 {den} 份，再取 {num} 份。",
+  "polya.of.carry": "{q} ÷ {den} = {unit}，再 {num} × {unit} = {answer}。",
+  "polya.of.lookback": "检查：{answer} 应该比总数 {q} 小。",
 
   /* Game */
   "game.score": "得分",
@@ -189,6 +221,10 @@ const zh: Dictionary = {
   "notes.wordProblem.steps": "1. 理解问题：我们知道什么？要求什么？\n2. 制定计划：选择运算——“一共”、“总共”用加法；“剩下”、“还有”用减法。\n3. 执行计划：仔细计算。\n4. 回顾检查：答案合理吗？",
   "notes.wordProblem.example": "美玲吃了蛋糕的 2/5，弟弟吃了 1/5。一共：2/5 + 1/5 = 3/5。",
   "notes.wordProblem.tip": "开始计算前，先把题目中的关键词圈出来。",
+  "notes.fractionOfQuantity.concept": "“某数量的几分之几”表示部分的值，例如 50 的 2/5。“的”表示把数量平均分成若干份。",
+  "notes.fractionOfQuantity.steps": "1. 用数量除以分母，求出一份的值。\n2. 再乘以分子，求出所需份数的值。",
+  "notes.fractionOfQuantity.example": "50 的 2/5：50 ÷ 5 = 10，再 2 × 10 = 20。所以 50 的 2/5 = 20。",
+  "notes.fractionOfQuantity.tip": "记得检查：真分数的答案一定比原来的数量小。",
 
   /* Challenge */
   "challenge.title": "挑战模式",
@@ -333,6 +369,8 @@ const zh: Dictionary = {
   "err.swapped-parts": "整数和分子调换了",
   "err.wrong-whole": "整数部分错误",
   "err.reversed-order": "排列方向相反",
+  "err.unit-fraction-only": "只求了一份（数量的 1/分母），忘了乘以分子",
+  "err.found-remainder": "求了剩下的部分，而不是题目要求的部分",
   "err.random-near": "其他 / 粗心错误",
   "err.timeout": "超时未作答",
 

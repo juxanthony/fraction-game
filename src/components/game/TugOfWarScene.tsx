@@ -68,17 +68,18 @@ export default function TugOfWarScene({ ropePosition, playerName, opponentName, 
           <ellipse cx="600" cy="50" rx="38" ry="14" />
         </g>
 
-        {/* crowd stands */}
+        {/* crowd stands — the crowd jumps and cheers after every answer */}
         <rect x="0" y="64" width={W} height="44" fill="#94a3b8" />
         {Array.from({ length: 26 }, (_, i) => (
-          <g key={i}>
-            <circle
-              cx={18 + i * 30}
-              cy={i % 2 === 0 ? 78 : 92}
-              r="8"
-              fill={["#f472b6", "#60a5fa", "#fbbf24", "#34d399", "#a78bfa"][i % 5]}
-            />
-          </g>
+          <motion.circle
+            key={i}
+            cx={18 + i * 30}
+            cy={i % 2 === 0 ? 78 : 92}
+            r="8"
+            fill={["#f472b6", "#60a5fa", "#fbbf24", "#34d399", "#a78bfa"][i % 5]}
+            animate={shake ? { cy: [i % 2 === 0 ? 78 : 92, (i % 2 === 0 ? 78 : 92) - 6 - (i % 3) * 2, i % 2 === 0 ? 78 : 92] } : {}}
+            transition={{ duration: 0.5, delay: (i % 5) * 0.05, repeat: shake ? 1 : 0 }}
+          />
         ))}
 
         {/* grass field */}

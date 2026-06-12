@@ -8,8 +8,8 @@ Aligned to the **KSSR Mathematics Year 5** syllabus (Fractions), with **Polya's 
 
 | Area | What's included |
 | --- | --- |
-| **Game modes** | Practice (unlimited, hints, no timer) · Challenge (20 questions, 30 s timer, XP) · Tournament (5 AI rounds: School → District → State → National → Champion Cup) · Two-player on one device |
-| **Curriculum** | Comparing, ordering, equivalent fractions, addition, subtraction, mixed ↔ improper conversion, RME word problems, KBAT items with rising difficulty |
+| **Game modes** | Practice (unlimited, hints) · Challenge (20 questions, XP) · Tournament (5 AI rounds: School → District → State → National → Champion Cup) · Two-player on one device. Every question has a countdown: 30 s for recognition items, 60 s for calculation items |
+| **Curriculum** | Aligned to KSSR Semakan 2017 DSKP codes (7.1.1–7.1.4, 7.2.1–7.2.3, 7.3.1): comparing, ordering, equivalent fractions, addition/subtraction (incl. mixed numbers, whole numbers and three-number operations), fraction of a quantity, RME word problems and KBAT items with rising difficulty |
 | **Question engine** | Unlimited random generation, misconception-based distractors, no duplicate options, explanations, hints, learning objectives per item |
 | **Visual models** | SVG fraction bars, circles and number lines — responsive and colour-blind safe (hatching, not colour alone) |
 | **Gamification** | XP economy, 5 badges, daily missions, streak bonuses, level progression |

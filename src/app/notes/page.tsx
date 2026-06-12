@@ -62,6 +62,11 @@ const NOTE_TOPICS: { topic: Topic; icon: string; visual: Visual }[] = [
     visual: { kind: "circle", fractions: [{ num: 7, den: 4 }] },
   },
   {
+    topic: "fractionOfQuantity",
+    icon: "🧮",
+    visual: { kind: "bar", fractions: [{ num: 2, den: 5 }], labels: ["2/5"] },
+  },
+  {
     topic: "wordProblem",
     icon: "📖",
     visual: {

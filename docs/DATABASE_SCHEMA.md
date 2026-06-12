@@ -36,8 +36,8 @@ The app uses a **local-first** model: localStorage is the source of truth on eac
 | --- | --- | --- |
 | `id`, `profileId`, `timestamp` | — | Identity + ordering |
 | `mode` | enum | practice / challenge / tournament / multiplayer |
-| `topic` | enum | compare / ordering / equivalent / addition / subtraction / mixedNumbers / wordProblem |
-| `level`, `difficulty` | number | Curriculum level 1–6, item difficulty 1–3 |
+| `topic` | enum | compare / ordering / equivalent / addition / subtraction / mixedNumbers / fractionOfQuantity / wordProblem |
+| `level`, `difficulty` | number | Curriculum level 1–7, item difficulty 1–3 |
 | `promptKey` | string | Identifies the item template |
 | `correct` | boolean | — |
 | `selectedText` / `correctText` | string | Chosen vs expected answer ("" when timed out) |

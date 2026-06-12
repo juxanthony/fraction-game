@@ -58,10 +58,12 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.08 * i }}
+            whileHover={{ scale: 1.04, rotate: i % 2 === 0 ? -1 : 1 }}
+            whileTap={{ scale: 0.97 }}
           >
             <Link
               href={m.href}
-              className={`block rounded-3xl bg-gradient-to-br ${m.color} text-white p-5 shadow-lg border-4 border-white/60 hover:scale-[1.02] active:scale-[0.99] transition-transform`}
+              className={`block rounded-3xl bg-gradient-to-br ${m.color} text-white p-5 shadow-lg border-4 border-white/60`}
             >
               <div className="text-4xl mb-1">{m.icon}</div>
               <div className="text-2xl font-extrabold">{t(m.titleKey)}</div>

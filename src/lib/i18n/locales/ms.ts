@@ -28,13 +28,15 @@ const ms: Dictionary = {
   "level.3": "Penambahan Pecahan",
   "level.4": "Penolakan Pecahan",
   "level.5": "Nombor Bercampur",
-  "level.6": "Masalah Bercerita",
+  "level.6": "Pecahan daripada Kuantiti",
+  "level.7": "Masalah Bercerita",
   "topic.compare": "Membanding Pecahan",
   "topic.ordering": "Menyusun Pecahan",
   "topic.equivalent": "Pecahan Setara",
   "topic.addition": "Penambahan Pecahan",
   "topic.subtraction": "Penolakan Pecahan",
   "topic.mixedNumbers": "Nombor Bercampur",
+  "topic.fractionOfQuantity": "Pecahan daripada Kuantiti",
   "topic.wordProblem": "Masalah Bercerita",
 
   /* Question prompts */
@@ -44,9 +46,12 @@ const ms: Dictionary = {
   "q.order.desc": "Susun pecahan daripada yang paling besar kepada yang paling kecil.",
   "q.equivalent": "Pecahan manakah yang setara dengan {a}?",
   "q.addition": "{a} + {b} = ?",
+  "q.addition3": "{a} + {b} + {c} = ?",
   "q.subtraction": "{a} − {b} = ?",
+  "q.subtraction3": "{a} − {b} − {c} = ?",
   "q.toMixed": "Tukarkan {a} kepada nombor bercampur.",
   "q.toImproper": "Tukarkan {a} kepada pecahan tak wajar.",
+  "q.ofQuantity": "Berapakah {a} daripada {q}?",
 
   /* Word problems (RME contexts) */
   "wp.cake": "{name} makan {a} daripada sebiji kek. Adiknya makan {b} daripada kek yang sama. Berapakah pecahan kek yang dimakan kesemuanya?",
@@ -61,6 +66,9 @@ const ms: Dictionary = {
   "wp.journey": "Perjalanan dari rumah {name} ke sekolah ialah {a} km. Bas sekolah telah bergerak sejauh {b} km. Berapa jauh lagikah bas itu perlu bergerak?",
   "wp.reading": "{name} telah membaca {b} daripada sebuah buku cerita. Berapakah pecahan buku itu yang belum dibaca?",
   "wp.garden": "{name} menyiram {b} daripada pokok di taman. Berapakah pecahan pokok yang belum disiram?",
+  "wp.marbles": "{name} mempunyai {q} biji guli. {a} daripadanya berwarna biru. Berapa bijikah guli biru itu?",
+  "wp.pupils": "Terdapat {q} orang murid di perhimpunan sekolah. {a} daripadanya ialah murid lelaki. Berapa orangkah murid lelaki di perhimpunan itu?",
+  "wp.money": "{name} menyimpan RM{q} dan membelanjakan {a} daripada simpanannya untuk sebuah buku cerita. Berapakah wang yang dibelanjakan?",
 
   /* Explanations */
   "exp.compare.sameDen": "Semua pecahan mempunyai penyebut yang sama, jadi bandingkan pengangka: semakin besar pengangka, semakin besar pecahan. Jawapannya ialah {answer}.",
@@ -76,6 +84,13 @@ const ms: Dictionary = {
   "exp.toImproper": "Darabkan nombor bulat dengan penyebut: {whole} × {den} = {product}. Tambahkan pengangka {num}. Jadi pecahan tak wajar ialah {answer}.",
   "exp.wp.add": "Perkataan 'kesemuanya' memberitahu kita untuk MENAMBAH: {a} + {b} = {answer}.",
   "exp.wp.sub": "Untuk mencari baki, kita MENOLAK: {a} − {b} = {answer}.",
+  "exp.add.mixed": "Kekalkan nombor bulat {whole}. Tambahkan bahagian pecahan: {fa} + {b} = {fs}. Jawapannya ialah {answer}.",
+  "exp.add.three": "Tambah langkah demi langkah: {a} + {b} = {ab}, kemudian {ab} + {c} = {answer}.",
+  "exp.sub.mixed": "Tukarkan {a} kepada pecahan tak wajar {imp}. Kemudian tolak: {imp} − {b} = {answer}.",
+  "exp.sub.whole": "Tuliskan {w} sebagai pecahan {impW}. Kemudian tolak: {impW} − {b} = {answer}.",
+  "exp.sub.three": "Tolak langkah demi langkah: {a} − {b} = {ab}, kemudian {ab} − {c} = {answer}.",
+  "exp.ofQuantity": "Bahagikan kuantiti dengan penyebut: {q} ÷ {den} = {unit}. Kemudian darabkan dengan pengangka: {num} × {unit} = {answer}.",
+  "exp.wp.of": "'Daripada' bermaksud mencari sebahagian kuantiti: {q} ÷ {den} = {unit}, kemudian {num} × {unit} = {answer}.",
 
   /* Hints */
   "hint.compare.sameDen": "Penyebut sama? Lihat pengangka sahaja!",
@@ -91,15 +106,28 @@ const ms: Dictionary = {
   "hint.toImproper": "Nombor bulat × penyebut + pengangka.",
   "hint.wp.add": "'Kesemuanya' bermaksud kita menambah dua pecahan itu.",
   "hint.wp.sub": "'Baki' atau 'tinggal' bermaksud kita menolak.",
+  "hint.add.mixed": "Tambahkan nombor bulat dan bahagian pecahan secara berasingan.",
+  "hint.add.three": "Tambahkan dua nombor pertama dahulu, kemudian tambah yang ketiga.",
+  "hint.sub.mixed": "Tukarkan nombor bercampur kepada pecahan tak wajar dahulu.",
+  "hint.sub.whole": "Tuliskan nombor bulat sebagai pecahan dengan penyebut yang sama.",
+  "hint.sub.three": "Tolak satu nombor pada satu masa, dari kiri ke kanan.",
+  "hint.ofQuantity": "Bahagikan dengan {den} dahulu untuk mendapat satu bahagian, kemudian darabkan dengan {num}.",
+  "hint.wp.of": "'Daripada' bermaksud: kuantiti ÷ penyebut × pengangka.",
 
-  /* Learning objectives (KSSR Year 5) */
+  /* Learning objectives (KSSR Year 5, Semakan 2017 — kod DSKP) */
   "obj.compare": "KSSR T5 · Pecahan: membanding nilai pecahan wajar",
   "obj.order": "KSSR T5 · Pecahan: menyusun pecahan mengikut nilai",
   "obj.equivalent": "KSSR T5 · Pecahan: mengenal dan menamakan pecahan setara",
-  "obj.add": "KSSR T5 · Pecahan: penambahan pecahan wajar dan nombor bercampur",
-  "obj.sub": "KSSR T5 · Pecahan: penolakan pecahan wajar dan nombor bercampur",
+  "obj.add.same": "KSSR T5 · 7.1.2: Menambah dua pecahan wajar berpenyebut sama",
+  "obj.add.unlike": "KSSR T5 · 7.1.3: Menambah dua pecahan wajar berpenyebut berbeza",
+  "obj.add.mixed": "KSSR T5 · 7.1.4: Menambah nombor bercampur dengan pecahan wajar",
+  "obj.add.three": "KSSR T5 · 7.1.1: Menambah hingga tiga nombor (nombor bulat, pecahan wajar, nombor bercampur; penyebut hingga 10)",
+  "obj.sub.proper": "KSSR T5 · 7.2.2: Menolak dua pecahan wajar berpenyebut sama dan berbeza",
+  "obj.sub.mixed": "KSSR T5 · 7.2.3: Menolak pecahan wajar daripada nombor bercampur",
+  "obj.sub.three": "KSSR T5 · 7.2.1: Menolak hingga tiga nombor melibatkan nombor bulat, pecahan wajar dan nombor bercampur",
+  "obj.ofQuantity": "KSSR T5 · 7.3.1: Menentukan nilai pecahan wajar daripada suatu kuantiti",
   "obj.mixed": "KSSR T5 · Pecahan: penukaran antara pecahan tak wajar dan nombor bercampur",
-  "obj.word": "KSSR T5 · Pecahan: menyelesaikan masalah harian melibatkan pecahan (KBAT)",
+  "obj.word": "KSSR T5 · Pecahan: menyelesaikan masalah harian melibatkan pecahan (penyelesaian masalah bersepadu, KBAT)",
 
   /* Polya model */
   "polya.title": "4 Langkah Polya",
@@ -115,6 +143,10 @@ const ms: Dictionary = {
   "polya.sub.plan": "Perkataan seperti 'baki' dan 'tinggal' memberitahu kita untuk MENOLAK.",
   "polya.sub.carry": "Kira {a} − {b}. Jika penyebut berbeza, samakan penyebut dahulu.",
   "polya.sub.lookback": "Semak: {answer} + {b} sepatutnya kembali kepada {a}.",
+  "polya.of.understand": "Kita tahu jumlahnya ialah {q} dan kita perlu mencari {a} daripadanya.",
+  "polya.of.plan": "'Daripada' bermaksud: bahagikan jumlah kepada {den} bahagian sama, kemudian ambil {num} bahagian.",
+  "polya.of.carry": "{q} ÷ {den} = {unit}, kemudian {num} × {unit} = {answer}.",
+  "polya.of.lookback": "Semak: {answer} sepatutnya kurang daripada jumlah {q}.",
 
   /* Game */
   "game.score": "Markah",
@@ -189,6 +221,10 @@ const ms: Dictionary = {
   "notes.wordProblem.steps": "1. Memahami: apakah yang kita tahu? Apakah yang perlu dicari?\n2. Merancang: pilih operasi — 'kesemuanya' atau 'jumlah' bermaksud tambah; 'baki' atau 'tinggal' bermaksud tolak.\n3. Melaksanakan: buat pengiraan dengan teliti.\n4. Menyemak semula: adakah jawapan munasabah?",
   "notes.wordProblem.example": "Mei Ling makan 2/5 daripada sebiji kek dan adiknya makan 1/5. Kesemuanya: 2/5 + 1/5 = 3/5 daripada kek itu.",
   "notes.wordProblem.tip": "Gariskan kata kunci dalam soalan sebelum mula mengira.",
+  "notes.fractionOfQuantity.concept": "Pecahan DARIPADA suatu kuantiti memberitahu kita nilai sebahagian, contohnya 2/5 daripada 50. Perkataan 'daripada' bermaksud kuantiti itu dibahagikan kepada bahagian yang sama.",
+  "notes.fractionOfQuantity.steps": "1. Bahagikan kuantiti dengan penyebut untuk mendapat SATU bahagian.\n2. Darabkan dengan pengangka untuk mendapat bilangan bahagian yang diperlukan.",
+  "notes.fractionOfQuantity.example": "2/5 daripada 50: 50 ÷ 5 = 10, kemudian 2 × 10 = 20. Jadi 2/5 daripada 50 = 20.",
+  "notes.fractionOfQuantity.tip": "Semak jawapan: bagi pecahan wajar, jawapan mesti lebih kecil daripada kuantiti asal.",
 
   /* Challenge */
   "challenge.title": "Mod Cabaran",
@@ -333,6 +369,8 @@ const ms: Dictionary = {
   "err.swapped-parts": "Menukar tempat nombor bulat dan pengangka",
   "err.wrong-whole": "Bahagian nombor bulat salah",
   "err.reversed-order": "Susunan terbalik",
+  "err.unit-fraction-only": "Hanya mencari satu bahagian (1/penyebut), lupa darab dengan pengangka",
+  "err.found-remainder": "Mencari bahagian baki, bukan bahagian yang diminta",
   "err.random-near": "Lain-lain / kecuaian",
   "err.timeout": "Kehabisan masa",
 

@@ -1,7 +1,7 @@
 import { generateQuestion } from "@/lib/question-generator/generator";
 
 let failures = 0;
-for (let level = 1; level <= 6; level++) {
+for (let level = 1; level <= 7; level++) {
   for (const diff of [1, 2, 3] as const) {
     for (let i = 0; i < 500; i++) {
       const q = generateQuestion(level, diff);

@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import Confetti from "./Confetti";
 import { useI18n } from "@/lib/i18n";
 import type { MatchState } from "@/lib/game-engine/engine";
 import type { MatchOutcome } from "@/lib/game-engine/recorder";
@@ -28,6 +29,22 @@ interface Props {
 export default function ResultsScreen({ state, outcome, history = [], onPlayAgain, onExit }: Props) {
   const { t } = useI18n();
   const [showReview, setShowReview] = useState(false);
+
+  // XP counts up from 0 for a satisfying reveal.
+  const [xpShown, setXpShown] = useState(0);
+  useEffect(() => {
+    if (!outcome) return;
+    let raf = 0;
+    const start = performance.now();
+    const duration = 900;
+    const step = (now: number) => {
+      const p = Math.min(1, (now - start) / duration);
+      setXpShown(Math.round(outcome.xpEarned * p));
+      if (p < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [outcome]);
   const answered = state.questionIndex + 1;
   const accuracy = answered > 0 ? Math.round((state.correctCount / answered) * 100) : 0;
   const avgTimeS = ((Date.now() - state.startedAt) / Math.max(1, answered) / 1000).toFixed(1);
@@ -37,6 +54,7 @@ export default function ResultsScreen({ state, outcome, history = [], onPlayAgai
 
   return (
     <motion.div initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }}>
+      {state.result === "win" && <Confetti count={60} />}
       <Card className="max-w-xl mx-auto text-center space-y-5">
         <motion.div
           initial={{ y: -30 }}
@@ -63,9 +81,14 @@ export default function ResultsScreen({ state, outcome, history = [], onPlayAgai
         </div>
 
         {outcome && (
-          <div className="rounded-2xl bg-amber-50 border-2 border-amber-200 p-3 font-extrabold text-amber-800 text-xl">
-            ⭐ {t("game.xpEarned")}: +{outcome.xpEarned} XP
-          </div>
+          <motion.div
+            initial={{ scale: 0.7, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", delay: 0.15 }}
+            className="rounded-2xl bg-amber-50 border-2 border-amber-200 p-3 font-extrabold text-amber-800 text-xl"
+          >
+            ⭐ {t("game.xpEarned")}: +{xpShown} XP
+          </motion.div>
         )}
 
         {outcome && outcome.newBadges.length > 0 && (

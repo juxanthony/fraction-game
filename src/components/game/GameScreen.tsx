@@ -21,6 +21,7 @@ import { playCorrect, playTick, playWin, playWrong } from "@/lib/audio";
 import TugOfWarScene from "./TugOfWarScene";
 import QuestionCard from "./QuestionCard";
 import ResultsScreen from "./ResultsScreen";
+import Confetti from "./Confetti";
 import FractionText from "@/components/fractions/FractionText";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -46,6 +47,8 @@ export default function GameScreen({
   const [state, setState] = useState<MatchState>(() => createMatch(config));
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [outcome, setOutcome] = useState<MatchOutcome | null>(null);
+  // Increments on every streak milestone to remount a confetti burst.
+  const [confettiBurst, setConfettiBurst] = useState(0);
 
   const questionStartRef = useRef<number>(Date.now());
   const hintUsedRef = useRef(false);
@@ -88,6 +91,10 @@ export default function GameScreen({
       streakBonusRef.current += next.lastResult?.streakBonusXp ?? 0;
       if (next.lastResult?.correct) playCorrect();
       else playWrong();
+      // Confetti on every 5-in-a-row streak milestone.
+      if (next.lastResult?.correct && next.streak > 0 && next.streak % 5 === 0) {
+        setConfettiBurst((b) => b + 1);
+      }
       stateRef.current = next;
       setState(next);
     },
@@ -232,12 +239,39 @@ export default function GameScreen({
         </div>
       </div>
 
-      <TugOfWarScene
-        ropePosition={state.ropePosition}
-        playerName={profile.name || t("game.you")}
-        opponentName={opponentName}
-        shake={state.phase === "feedback"}
-      />
+      {confettiBurst > 0 && <Confetti key={confettiBurst} count={30} />}
+
+      <div className="relative">
+        <TugOfWarScene
+          ropePosition={state.ropePosition}
+          playerName={profile.name || t("game.you")}
+          opponentName={opponentName}
+          shake={state.phase === "feedback"}
+        />
+        {/* floating pull-strength indicator */}
+        <AnimatePresence>
+          {state.phase === "feedback" && last && (
+            <motion.div
+              key={state.questionIndex}
+              initial={{ opacity: 0, y: 16, scale: 0.5 }}
+              animate={{ opacity: 1, y: -6, scale: 1.2 }}
+              exit={{ opacity: 0, y: -28 }}
+              transition={{ type: "spring", stiffness: 260, damping: 18 }}
+              className={`absolute left-1/2 -translate-x-1/2 top-2 px-4 py-1 rounded-full border-2 bg-white/95 font-extrabold text-xl shadow-lg ${
+                last.ropeDelta > 0
+                  ? "text-green-600 border-green-400"
+                  : last.ropeDelta < 0
+                    ? "text-rose-600 border-rose-400"
+                    : "text-slate-500 border-slate-300"
+              }`}
+              aria-hidden="true"
+            >
+              {last.ropeDelta > 0 ? `+${last.ropeDelta}` : last.ropeDelta === 0 ? "±0" : last.ropeDelta} 🪢
+              {state.streak >= 2 && last.correct && <span className="ml-1 text-orange-500">🔥{state.streak}</span>}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* feedback banner */}
       <AnimatePresence>

@@ -7,7 +7,8 @@
 
 export interface WordProblemTemplate {
   id: string;
-  op: "add" | "sub";
+  /** "of" = fraction of a quantity (DSKP 7.3, e.g. "2/5 of 50 marbles"). */
+  op: "add" | "sub" | "of";
   context: "food" | "shopping" | "sports" | "school" | "travel" | "daily";
   /** Subtraction from one whole (e.g. "how much of the book is left?"). */
   fromWhole?: boolean;
@@ -26,6 +27,9 @@ export const WORD_PROBLEM_TEMPLATES: WordProblemTemplate[] = [
   { id: "journey", op: "sub", context: "travel" },
   { id: "reading", op: "sub", context: "school", fromWhole: true },
   { id: "garden", op: "sub", context: "daily", fromWhole: true },
+  { id: "marbles", op: "of", context: "daily" },
+  { id: "pupils", op: "of", context: "school" },
+  { id: "money", op: "of", context: "shopping" },
 ];
 
 /** Common Malaysian pupil names (Chinese, Malay, Indian) for story contexts. */

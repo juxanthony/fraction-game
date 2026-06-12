@@ -71,6 +71,6 @@ playing ──answer(i | timeout)──▶ recordAttempt() ──▶ feedback
 
 ## Difficulty progression
 
-- Within a match, `questionForTurn(index, total)` ramps difficulty 1 → 3 with match progress; mixed-topic matches also sweep levels 1 → 6.
+- Within a match, `questionForTurn(index, total)` ramps difficulty 1 → 3 with match progress; mixed-topic matches also sweep levels 1 → 7.
 - Across the tournament, each round raises AI accuracy (25% → 65%) and the difficulty floor (1 → 3).
 - Per topic, difficulty controls denominators (small/related/unlike), numerator ranges and whether mixed numbers appear.

@@ -24,6 +24,7 @@ export const TOPICS: Topic[] = [
   "addition",
   "subtraction",
   "mixedNumbers",
+  "fractionOfQuantity",
   "wordProblem",
 ];
 
