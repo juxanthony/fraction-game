@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { I18nProvider } from "@/lib/i18n";
+import AnimatedBackground from "@/components/ui/AnimatedBackground";
 
 export const metadata: Metadata = {
   title: "Fraction Tug of War | 分数拔河大赛",
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="zh">
       <body className="min-h-screen antialiased">
+        <AnimatedBackground />
         <I18nProvider>{children}</I18nProvider>
       </body>
     </html>
